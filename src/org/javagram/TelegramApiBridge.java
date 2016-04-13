@@ -6,11 +6,8 @@ import org.javagram.handlers.IncomingMessageHandler;
 import org.javagram.response.AuthAuthorization;
 import org.javagram.response.AuthCheckedPhone;
 import org.javagram.response.AuthSentCode;
-import org.javagram.response.object.ContactStatus;
+import org.javagram.response.object.*;
 import org.javagram.response.MessagesSentMessage;
-import org.javagram.response.object.Message;
-import org.javagram.response.object.User;
-import org.javagram.response.object.UserContact;
 import org.telegram.api.*;
 import org.telegram.api.auth.TLAuthorization;
 import org.telegram.api.auth.TLCheckedPhone;
@@ -306,12 +303,19 @@ public class TelegramApiBridge
         return messages;
     }
 
-    public void messagesGetDialogs(int offset, int maxId, int limit) throws IOException
+    public ArrayList<Dialog> messagesGetDialogs(int offset, int maxId, int limit) throws IOException
     {
         TLRequestMessagesGetDialogs request = new TLRequestMessagesGetDialogs(offset, maxId, limit);
         TLAbsDialogs tlAbsDialogs = api.doRpcCall(request);
 
+        ArrayList<Dialog> dialogs = new ArrayList<>();
+        for(TLDialog tlDialog : tlAbsDialogs.getDialogs()) {
+            if(tlDialog.getPeer() instanceof TLPeerUser) {
+                dialogs.add(new Dialog(tlDialog));
+            }
+        }
 
+        return dialogs;
     }
 
     /**
