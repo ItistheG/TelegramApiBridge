@@ -2,6 +2,9 @@ package org.javagram.response.object;
 
 
 import org.telegram.api.*;
+import org.telegram.api.messages.TLMessages;
+
+import java.util.Date;
 
 /**
  * Created by Danya on 09.03.2016.
@@ -10,27 +13,68 @@ public class Message
 {
     private int id;
     private int fromId;
-    private int toId;
+    private Integer toId;
     private boolean out;
     private boolean unread;
-    private int date;
+    private Date date;
     private String message;
+
+    private Integer fwdFromId;
+    private Date fwdData;
 
     public Message(TLAbsMessage absMessage)
     {
+        id = absMessage.getId();
+
+        //Знаю, что говнокод, но у предка нет полей, кроме id.
         if(absMessage instanceof TLMessage)
         {
-            TLMessage message = (TLMessage) absMessage;
-            id = message.getId();
-            fromId = message.getFromId();
-            TLAbsPeer peer = message.getToId();
+            TLMessage tlMessage = (TLMessage) absMessage;
+
+            fromId = tlMessage.getFromId();
+            TLAbsPeer peer = tlMessage.getToId();
             if (peer instanceof TLPeerUser) {
                 toId = ((TLPeerUser) peer).getUserId();
             }
-            out = message.getOut();
-            unread = message.getUnread();
-            date = message.getDate();
-            this.message = message.getMessage();
+            out = tlMessage.getOut();
+            unread = tlMessage.getUnread();
+            date = new Date(tlMessage.getDate());
+            message = tlMessage.getMessage();
+        }
+        else if(absMessage instanceof  TLMessageForwarded)
+        {
+            TLMessageForwarded tlMessageForwarded = (TLMessageForwarded) absMessage;
+
+            fromId = tlMessageForwarded.getFromId();
+            TLAbsPeer peer = tlMessageForwarded.getToId();
+            if (peer instanceof TLPeerUser) {
+                toId = ((TLPeerUser) peer).getUserId();
+            }
+            out = tlMessageForwarded.getOut();
+            unread = tlMessageForwarded.getUnread();
+            date = new Date(tlMessageForwarded.getDate());
+            message = tlMessageForwarded.getMessage();
+
+            fwdFromId = tlMessageForwarded.getFwdFromId();
+            fwdData = new Date(tlMessageForwarded.getDate());
+        }
+      /*  else if(absMessage instanceof TLMessageService)
+        {
+            TLMessageService tlMessageService = (TLMessageService) absMessage;
+
+            fromId = tlMessageService.getFromId();
+            TLAbsPeer peer = tlMessageService.getToId();
+            if (peer instanceof TLPeerUser) {
+                toId = ((TLPeerUser) peer).getUserId();
+            }
+
+            out = tlMessageService.getOut();
+            unread = tlMessageService.getUnread();
+            date = new Date(tlMessageService.getDate());
+        } */
+        else
+        {
+            throw new IllegalArgumentException("Unsupported Message type");
         }
     }
 
@@ -42,7 +86,7 @@ public class Message
         return fromId;
     }
 
-    public int getToId() {
+    public Integer getToId() {
         return toId;
     }
 
@@ -54,11 +98,15 @@ public class Message
         return unread;
     }
 
-    public int getDate() {
+    public Date getDate() {
         return date;
     }
 
     public String getMessage() {
         return message;
+    }
+
+    public boolean isForwarded() {
+        return fwdFromId != null;
     }
 }

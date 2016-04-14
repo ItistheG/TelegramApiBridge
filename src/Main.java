@@ -2,6 +2,7 @@
 import org.javagram.TelegramApiBridge;
 import org.javagram.response.AuthAuthorization;
 import org.javagram.response.AuthCheckedPhone;
+import org.javagram.response.MessagesDialogs;
 import org.javagram.response.object.ContactStatus;
 import org.javagram.response.MessagesSentMessage;
 import org.javagram.response.object.User;
@@ -32,7 +33,7 @@ public class Main
         BufferedReader bReader = new BufferedReader(new InputStreamReader(System.in));
         TelegramApiBridge apiBridge = new TelegramApiBridge(prodAddr, appId, appHash);
 
-        String phoneNumber = "79039686945";
+        String phoneNumber = "79876497774";
 
         //Sending validation code
         apiBridge.authSendCode(phoneNumber);
@@ -61,6 +62,10 @@ public class Main
             AuthAuthorization auth = apiBridge.authSignUp(smsCode, firstName, lastName);
             System.err.println("You've signed up; name: " + auth.getUser().toString());
         }
+
+        MessagesDialogs dialogs = apiBridge.messagesGetDialogs();//0, Integer.MAX_VALUE, 2);
+
+       // dialogs.addAll(apiBridge.messagesGetDialogs(2, Integer.MAX_VALUE, 2));
 
         ArrayList<String> phoneNumbers = new ArrayList<>();
         phoneNumbers.add("79099494774");

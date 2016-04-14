@@ -3,12 +3,11 @@ package org.javagram;
 import org.javagram.core.MemoryApiState;
 import org.javagram.core.StaticContainer;
 import org.javagram.handlers.IncomingMessageHandler;
-import org.javagram.response.AuthAuthorization;
-import org.javagram.response.AuthCheckedPhone;
-import org.javagram.response.AuthSentCode;
+import org.javagram.response.*;
+import org.javagram.response.MessagesDialogs;
 import org.javagram.response.object.*;
-import org.javagram.response.MessagesSentMessage;
 import org.telegram.api.*;
+import org.telegram.api.TLAbsMessage;
 import org.telegram.api.auth.TLAuthorization;
 import org.telegram.api.auth.TLCheckedPhone;
 import org.telegram.api.auth.TLSentCode;
@@ -18,10 +17,7 @@ import org.telegram.api.engine.ApiCallback;
 import org.telegram.api.engine.AppInfo;
 import org.telegram.api.engine.TelegramApi;
 import org.telegram.api.help.TLInviteText;
-import org.telegram.api.messages.TLAbsDialogs;
-import org.telegram.api.messages.TLDialogs;
-import org.telegram.api.messages.TLMessages;
-import org.telegram.api.messages.TLSentMessage;
+import org.telegram.api.messages.*;
 import org.telegram.api.requests.*;
 import org.telegram.api.updates.TLState;
 import org.telegram.tl.TLBoolTrue;
@@ -303,19 +299,42 @@ public class TelegramApiBridge
         return messages;
     }
 
-    public ArrayList<Dialog> messagesGetDialogs(int offset, int maxId, int limit) throws IOException
+    protected MessagesDialogs messagesGetDialogs(int offset, int maxId, int limit) throws IOException
     {
         TLRequestMessagesGetDialogs request = new TLRequestMessagesGetDialogs(offset, maxId, limit);
         TLAbsDialogs tlAbsDialogs = api.doRpcCall(request);
+        if(tlAbsDialogs instanceof TLDialogsSlice)
+            return new MessagesDialogsSlice((TLDialogsSlice)tlAbsDialogs);
+        else
+            return new MessagesDialogs(tlAbsDialogs);
 
-        ArrayList<Dialog> dialogs = new ArrayList<>();
-        for(TLDialog tlDialog : tlAbsDialogs.getDialogs()) {
-            if(tlDialog.getPeer() instanceof TLPeerUser) {
-                dialogs.add(new Dialog(tlDialog));
-            }
+    }
+
+    private static class MessagesDialogsSlice extends MessagesDialogs {
+
+        private int count;
+
+        public MessagesDialogsSlice(TLDialogsSlice tlAbsDialogs) {
+            super(tlAbsDialogs);
+            count = tlAbsDialogs.getCount();
         }
 
-        return dialogs;
+        public int getCount() {
+            return count;
+        }
+    }
+
+    public MessagesDialogs messagesGetDialogs() throws IOException
+    {
+        int count = 0;
+
+        MessagesDialogs messagesDialogs = messagesGetDialogs(0, 0, count);
+        while(messagesDialogs instanceof MessagesDialogsSlice) {
+            count = ((MessagesDialogsSlice) messagesDialogs).getCount();
+            messagesDialogs = messagesGetDialogs(0, 0, count);
+        }
+
+        return messagesDialogs;
     }
 
     /**
