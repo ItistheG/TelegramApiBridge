@@ -2,7 +2,10 @@ package org.javagram.response.object;
 
 
 import org.telegram.api.*;
-import org.telegram.api.messages.TLMessages;
+import org.telegram.api.TLAbsMessage;
+import org.telegram.api.TLMessage;
+import org.telegram.api.TLMessageEmpty;
+import org.telegram.api.messages.*;
 
 import java.util.Date;
 
@@ -13,7 +16,7 @@ public class Message
 {
     private int id;
     private int fromId;
-    private Integer toId;
+    private Integer toPeerUserId, toPeerChatId;
     private boolean out;
     private boolean unread;
     private Date date;
@@ -27,14 +30,15 @@ public class Message
         id = absMessage.getId();
 
         //Знаю, что говнокод, но у предка нет полей, кроме id.
-        if(absMessage instanceof TLMessage)
-        {
+        if(absMessage instanceof TLMessage) {
             TLMessage tlMessage = (TLMessage) absMessage;
 
             fromId = tlMessage.getFromId();
             TLAbsPeer peer = tlMessage.getToId();
             if (peer instanceof TLPeerUser) {
-                toId = ((TLPeerUser) peer).getUserId();
+                toPeerUserId = ((TLPeerUser) peer).getUserId();
+            } else if (peer instanceof TLPeerChat){
+                toPeerChatId = ((TLPeerChat) peer).getChatId();
             }
             out = tlMessage.getOut();
             unread = tlMessage.getUnread();
@@ -48,7 +52,9 @@ public class Message
             fromId = tlMessageForwarded.getFromId();
             TLAbsPeer peer = tlMessageForwarded.getToId();
             if (peer instanceof TLPeerUser) {
-                toId = ((TLPeerUser) peer).getUserId();
+                toPeerUserId = ((TLPeerUser) peer).getUserId();
+            } else if (peer instanceof TLPeerChat){
+                toPeerChatId = ((TLPeerChat) peer).getChatId();
             }
             out = tlMessageForwarded.getOut();
             unread = tlMessageForwarded.getUnread();
@@ -58,20 +64,26 @@ public class Message
             fwdFromId = tlMessageForwarded.getFwdFromId();
             fwdData = new Date(tlMessageForwarded.getDate());
         }
-      /*  else if(absMessage instanceof TLMessageService)
+        else if(absMessage instanceof TLMessageService)
         {
             TLMessageService tlMessageService = (TLMessageService) absMessage;
 
             fromId = tlMessageService.getFromId();
             TLAbsPeer peer = tlMessageService.getToId();
             if (peer instanceof TLPeerUser) {
-                toId = ((TLPeerUser) peer).getUserId();
+                toPeerUserId = ((TLPeerUser) peer).getUserId();
+            } else if (peer instanceof TLPeerChat){
+                toPeerChatId = ((TLPeerChat) peer).getChatId();
             }
-
             out = tlMessageService.getOut();
             unread = tlMessageService.getUnread();
             date = new Date(tlMessageService.getDate());
-        } */
+            message = tlMessageService.getAction().toString();
+        }
+        else if(absMessage instanceof TLMessageEmpty)
+        {
+
+        }
         else
         {
             throw new IllegalArgumentException("Unsupported Message type");
@@ -84,10 +96,6 @@ public class Message
 
     public int getFromId() {
         return fromId;
-    }
-
-    public Integer getToId() {
-        return toId;
     }
 
     public boolean isOut() {
@@ -108,5 +116,25 @@ public class Message
 
     public boolean isForwarded() {
         return fwdFromId != null;
+    }
+
+    public Date getFwdData() {
+        return fwdData;
+    }
+
+    public Integer getToPeerUserId() {
+        return toPeerUserId;
+    }
+
+    public Integer getToPeerChatId() {
+        return toPeerChatId;
+    }
+
+    public boolean isSentToUser() {
+        return toPeerUserId != null;
+    }
+
+    public  boolean isSentToChat() {
+        return toPeerChatId != null;
     }
 }

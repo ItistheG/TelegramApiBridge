@@ -1,0 +1,124 @@
+Registration / Authorization
+
++ auth.checkPhone	Returns the system registration status of the phone number passed to it
++ auth.sendCode	Sends a text message with the confirmation code required for registration, to the passed-in phone number
++ auth.sendSms	Forces SMS message send to specified phone number
+- auth.sendCall	Makes a voice call to the passed-in phone number in which a synthesized voice repeats the confirmation code from the text message
++ auth.signUp	Registers a validated phone number in the system
++ auth.signIn	Authorizes a user in the system based on a validated phone number
++ auth.logOut	De-authorizes a user in the system
++ auth.sendInvites	Saves information about the fact that the current user has sent text message invitations to his or her unregistered contacts
+- auth.resetAuthorizations	Terminates authorized sessions.
+- auth.exportAuthorization	Returns the data required to copy an authorization to a different data center
+- auth.importAuthorization	Authorizes a user in the system based on a key transferred from the home data center
+- auth.bindTempAuthKey	Binds temporary authorization key to permanent authorization key
+
+Working with Notifications. Settings
+
+- account.registerDevice	Registers a device in order to subsequently send it PUSH notifications
+- account.unregisterDevice	Deletes a device based on its token and stops sending it PUSH notifications
+- account.updateNotifySettings	Edits settings for notifications from a specified user/group or from all users/groups
+- account.getNotifySettings	Receives current settings for notifications from a specified user/group or from all users/groups
+- account.resetNotifySettings	Resets all settings for notifications from users and groups
++ account.updateProfile	Updates user information
++ account.updateStatus	Updates a user�s online status
+- account.getWallPapers	Returns a list of available wallpapers
+- photos.uploadProfilePhoto	Updates the current user�s profile photo
+- photos.updateProfilePhoto	Sets a previously uploaded photo as the profile photo
+
+Working with Users
+
+TODO users.getUsers	Returns basic information about users based on their identifiers
+TODO users.getFullUser	Returns extended user information based on a user identifier
+- photos.getUserPhotos	Returns a list of user photos
+TODO account.checkUsername	Validates username, checks availability
+TODO account.updateUsername	Sets username for the current user.
+
+Working with Contacts
+
++ contacts.getStatuses	Returns a list of contact statuses
++ contacts.getContacts	Returns the current user�s contact list
+- contacts.importContacts	Imports contacts from an address book, returns added contacts
++ contacts.deleteContact	Deletes a single contact from the list
+- contacts.deleteContacts	Deletes several contacts from the list
+
+Working with the Black List
+
+- contacts.block	Adds a user to the blacklist
+- contacts.unblock	Deletes a user from the blacklist
+- contacts.getBlocked	Returns a list of blocked users
+
+Working with Messages
+
++ messages.sendMessage	Sends a text message
+- messages.sendMedia	Sends a message with non-text content
+TEST messages.setTyping	Transmits the current user typing event to the conversation partner or group
+TEST messages.getMessages	Returns a list of messages by message identifiers
+TEST messages.getDialogs	Returns a list of the current user�s conversations
+TODO messages.getHistory	Returns messages from the history of a single conversation
+TODO messages.search	Returns messages found based on a search query
+TODO messages.readHistory	Marks message history as read
+TODO messages.readMessageContents	Notifies the sender about the recipient having listened a voice message or watched a video
+- messages.deleteHistory	Deletes message history
+- messages.deleteMessages	Deletes messages by message identifiers
+TODO messages.receivedMessages	Confirms that a client has received messages and cancels push notifications
+- messages.forwardMessage	Forwards a single message
+- messages.forwardMessages	Forwards messages by message identifiers
+- messages.sendBroadcast	Sends messages out to multiple contacts
+
+Working with Chats
+
+- messages.getChats	Returns basic chat information by chat identifiers
+- messages.getFullChat	Returns complete chat information by chat identifier
+- messages.editChatTitle	Changes the chat name and sends out an appropriate service message
+- messages.editChatPhoto	Changes the chat photo and sends out an appropriate service message
+- messages.addChatUser	Adds a user to a chat and sends out an appropriate service message
+- messages.deleteChatUser	Drops a user from a chat and sends out an appropriate service message
+- messages.createChat	Creates a new chat
+
+Working with Secret Chats
+
+- messages.getDhConfig	Returns configuration parameters for Diffie-Hellman key generation
+- messages.requestEncryption	Sends a request to start a secret chat
+- messages.acceptEncryption	Confirms creation of a secret chat
+- messages.discardEncryption	Cancels the request to start a secret chat
+- messages.setEncryptedTyping	Sends typing event by the current user to a secret chat
+- messages.readEncryptedHistory	Marks secret chat history as read
+- messages.sendEncrypted	Sends a text message to a secret chat
+- messages.sendEncryptedFile	Sends a media message to a secret chat
+- messages.sendEncryptedService	Sends a service message to a secret chat
+- messages.receivedQueue	Confirms receipt of messages in a secret chat, cancels PUSH-notification
+
+Working with Geochats
+
+- geochats.getLocated	Searches for geochats based on coordinates
+- geochats.getRecents	Returns a list of recent geochats
+- geochats.checkin	Checks a user into a geochat and sends out an appropriate service message
+- geochats.getFullChat	Returns extended information about a geochat
+- geochats.editChatTitle	Changes the chat name and sends out an appropriate service message
+- geochats.editChatPhoto	Changes the geochat photo and sends out an appropriate service message
+- geochats.search	Searches a geochat�s message history
+- geochats.getHistory	Returns a geochat�s message history
+- geochats.setTyping	Sends a typing event to the current users in a geochat
+- geochats.sendMessage	Sends a text message to a geochat
+- geochats.sendMedia	Sends a non-text message to a geochat
+- geochats.createGeoChat	Creates a new geochat
+
+Working with Updates
+
+TODO updates.getState	Returns the current status of updates
+TODO updates.getDifference	Returns the difference between the current and transmitted statuses of updates
+
+Working with Files
+
+- upload.saveFilePart	Saves part of a file to be subsequently passed to a method
+- upload.saveBigFilePart	Saves part of a big file over 10Mb to be subsequently passed to a method
+- upload.getFile	Returns all or part of the contents of a file
+
+Miscellaneous
+
+- help.getConfig	Returns the current configuration, including the configuration of data centers
+- help.getSupport	Returns support id for the �ask a question� feature
+- help.getNearestDc	Returns information on the data center closest to the user
+- help.getAppUpdate	Return information on available updates for the current app
+- help.getInviteText	Returns the text of an invitation text message

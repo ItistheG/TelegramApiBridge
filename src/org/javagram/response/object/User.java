@@ -12,7 +12,7 @@ import java.io.IOException;
 /**
  * Created by Danya on 20.09.2015.
  */
-public class User
+public abstract class User
 {
     private int id;
     private String firstName;
@@ -20,26 +20,58 @@ public class User
     private String phone;
     private TLAbsUserProfilePhoto photo;
 
-    public User(TLAbsUser absUser)
+    public User(TLUserContact userContact)
     {
-        if(absUser instanceof TLUserContact)
-        {
-            TLUserContact userContact = (TLUserContact) absUser;
-            id = userContact.getId();
-            firstName = userContact.getFirstName();
-            lastName = userContact.getLastName();
-            phone = userContact.getPhone();
-            photo = userContact.getPhoto();
-        }
-        else if(absUser instanceof TLUserSelf)
-        {
-            TLUserSelf userSelf = (TLUserSelf) absUser;
-            id = userSelf.getId();
-            firstName = userSelf.getFirstName();
-            lastName = userSelf.getLastName();
-            phone = userSelf.getPhone();
-            photo = userSelf.getPhoto();
-        }
+        id = userContact.getId();
+        firstName = userContact.getFirstName();
+        lastName = userContact.getLastName();
+        phone = userContact.getPhone();
+        photo = userContact.getPhoto();
+    }
+
+    public User(TLUserSelf userSelf)
+    {
+        id = userSelf.getId();
+        firstName = userSelf.getFirstName();
+        lastName = userSelf.getLastName();
+        phone = userSelf.getPhone();
+        photo = userSelf.getPhoto();
+    }
+
+    public User(TLUserRequest userRequest)
+    {
+        id = userRequest.getId();
+        firstName = userRequest.getFirstName();
+        lastName = userRequest.getLastName();
+        phone = userRequest.getPhone();
+        photo = userRequest.getPhoto();
+    }
+
+    public User(TLUserForeign userForeign)
+    {
+        id = userForeign.getId();
+        firstName = userForeign.getFirstName();
+        lastName = userForeign.getLastName();
+        phone = "";
+        photo = userForeign.getPhoto();
+    }
+
+    public User(TLUserDeleted userDeleted)
+    {
+        id = userDeleted.getId();
+        firstName = userDeleted.getFirstName();
+        lastName = userDeleted.getLastName();
+        phone = "";
+        photo = null;
+    }
+
+    public User(TLUserEmpty userEmpty)
+    {
+        id = userEmpty.getId();
+        firstName = "";
+        lastName = "";
+        phone = "";
+        photo = null;
     }
 
     public int getId()
@@ -100,5 +132,69 @@ public class User
     {
         String contact = getFirstName() + " " + getLastName();
         return contact.trim();
+    }
+
+    public static User createUser(TLAbsUser absUser)
+    {
+        if(absUser instanceof TLUserContact)
+        {
+            return new UserContact((TLUserContact)absUser);
+        }
+        else if(absUser instanceof TLUserSelf)
+        {
+            return new UserSelf((TLUserSelf)absUser);
+        }
+        else if (absUser instanceof TLUserForeign)
+        {
+            return new UserForeign((TLUserForeign)absUser);
+        }
+        else if (absUser instanceof TLUserDeleted)
+        {
+            return new UserDeleted((TLUserDeleted)absUser);
+        }
+        else if (absUser instanceof TLUserRequest)
+        {
+            return new UserRequest((TLUserRequest)absUser);
+        }
+        else if (absUser instanceof TLUserEmpty)
+        {
+            return new UserEmpty((TLUserEmpty)absUser);
+        }
+        else
+        {
+            throw new IllegalArgumentException("Unsupported user type");
+        }
+    }
+
+    public static TLAbsInputPeer createTLInputPeer(User user)
+    {
+        if(user instanceof UserSelf)
+        {
+            return new TLInputPeerSelf();
+        }
+        else if(user instanceof UserContact)
+        {
+            return new TLInputPeerContact(user.getId());
+        }
+        else if(user instanceof UserForeign)
+        {
+            return new TLInputPeerForeign(user.getId(), ((UserForeign) user).getAccessHash());
+        }
+        else if(user instanceof UserRequest)
+        {
+            return null;
+        }
+        else if(user instanceof UserEmpty)
+        {
+            return new TLInputPeerEmpty();
+        }
+        else if(user instanceof UserDeleted)
+        {
+            return null;
+        }
+        else
+        {
+            throw new IllegalArgumentException("Unsupported user type");
+        }
     }
 }

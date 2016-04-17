@@ -1,6 +1,7 @@
 package org.javagram.response.object;
 
 import org.telegram.api.TLDialog;
+import org.telegram.api.TLPeerChat;
 import org.telegram.api.TLPeerUser;
 
 /**
@@ -8,17 +9,18 @@ import org.telegram.api.TLPeerUser;
  */
 public class Dialog {
 
-    private Integer anotherUserId;
+    private Integer peerUserId, peerChatId;
     private int topMessage;
     private int unreadCount;
 
     public Dialog(TLDialog tlDialog) {
-        //TODO: To implement
+
         if(tlDialog.getPeer() instanceof TLPeerUser) {
             TLPeerUser peer = (TLPeerUser)tlDialog.getPeer();
-            anotherUserId = peer.getUserId();
-        } else {
-            anotherUserId = null;
+            peerUserId = peer.getUserId();
+        } else if(tlDialog.getPeer() instanceof TLPeerChat) {
+            TLPeerChat peer = (TLPeerChat)tlDialog.getPeer();
+            peerChatId = peer.getChatId();
         }
 
         topMessage = tlDialog.getTopMessage();
@@ -33,7 +35,19 @@ public class Dialog {
         return unreadCount;
     }
 
-    public Integer getAnotherUserId() {
-        return anotherUserId;
+    public Integer getPeerUserId() {
+        return peerUserId;
+    }
+
+    public Integer getPeerChatId() {
+        return peerChatId;
+    }
+
+    public boolean isUserDialog() {
+        return peerUserId != null;
+    }
+
+    public boolean isChat() {
+        return peerChatId != null;
     }
 }

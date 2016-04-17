@@ -17,10 +17,10 @@ public class UserContact extends User
         isOnline = tlUserContact.getStatus() instanceof TLUserStatusOnline;
     }
 
-    public UserContact(TLUserSelf tlUserSelf)
+  /*  public UserContact(TLUserSelf tlUserSelf)
     {
         super(tlUserSelf);
-    }
+    }*/
 
     public long getAccessHash()
     {

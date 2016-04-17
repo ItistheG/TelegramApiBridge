@@ -1,10 +1,7 @@
 package org.javagram.response;
 
 import org.javagram.response.InconsistentDataException;
-import org.javagram.response.object.Dialog;
-import org.javagram.response.object.Message;
-import org.javagram.response.object.User;
-import org.javagram.response.object.UserContact;
+import org.javagram.response.object.*;
 import org.telegram.api.*;
 import org.telegram.api.messages.TLAbsDialogs;
 import org.telegram.api.messages.TLDialogsSlice;
@@ -22,6 +19,8 @@ public class MessagesDialogs {
     private List<Dialog> dialogs = new ArrayList<>();
     private List<Message> messages = new ArrayList<>();
     private List<User> users = new ArrayList<>();
+    private List<Chat> chats = new ArrayList<>();
+    private Integer count;
 
     public MessagesDialogs(TLAbsDialogs tlAbsDialogs) {
 
@@ -31,66 +30,101 @@ public class MessagesDialogs {
             throw new InconsistentDataException();
 
         for(int i = 0; i < count; i++) {
+
             TLDialog tlDialog = tlAbsDialogs.getDialogs().get(i);
             TLAbsMessage tlMessage = tlAbsDialogs.getMessages().get(i);
 
+            Dialog dialog = new Dialog(tlDialog);
+            Message message = new Message(tlMessage);
+
             if(tlDialog.getPeer() instanceof TLPeerUser) {
-                Dialog dialog = new Dialog(tlDialog);
 
-                if(tlMessage instanceof TLMessage || tlMessage instanceof TLMessageForwarded) {
-                    Message message = new Message(tlMessage);
+                if(message.getFromId() != dialog.getPeerUserId()
+                        && message.getToPeerUserId().intValue() != dialog.getPeerUserId().intValue())
+                    throw new InconsistentDataException();
 
-                    if(message.getFromId() != dialog.getAnotherUserId()
-                            && message.getToId().intValue() != dialog.getAnotherUserId().intValue())
-                        throw new InconsistentDataException();
+                dialogs.add(dialog);
+                messages.add(message);
 
-                    dialogs.add(dialog);
-                    messages.add(message);
+            } else if(tlDialog.getPeer() instanceof TLPeerChat) {
 
-                }
+                if(message.getToPeerChatId().intValue() != dialog.getPeerChatId().intValue())
+                    throw new InconsistentDataException();
+
+                dialogs.add(dialog);
+                messages.add(message);
+
+            } else {
+                throw new InconsistentDataException();
             }
         }
 
-        boolean dialogNeeded[] = new boolean[count];
+        //boolean dialogNeeded[] = new boolean[count];
 
         for(TLAbsUser tlAbsUser : tlAbsDialogs.getUsers()) {
-            if(tlAbsUser instanceof TLUserContact) {
-
-                boolean needed = false;
+            if(!(tlAbsUser instanceof TLUserSelf)) {
 
                 for (int i = 0; i < messages.size(); i++) {
                     Message message = messages.get(i);
+                    if(!message.isSentToUser())
+                        continue;
                     if (message.getFromId() == tlAbsUser.getId()
-                            || message.getToId() == tlAbsUser.getId()) {
-                        needed = true;
-                        dialogNeeded[i] = true;
+                            || message.getToPeerUserId() == tlAbsUser.getId()) {
+                        users.add(User.createUser(tlAbsUser));
+                        //dialogNeeded[i] = true;
                         break;
                     }
                 }
-
-                if(needed)
-                    users.add(new UserContact((TLUserContact)tlAbsUser));
             }
         }
 
-        // Надо удалить сообщения от неконтактов?
-        for(int i = dialogNeeded.length - 1; i >=0; i--) {
+        //TODO: Надо удалить сообщения от неконтактов?
+        /*for(int i = dialogNeeded.length - 1; i >=0; i--) {
             if(!dialogNeeded[i]) {
                 dialogs.remove(i);
                 messages.remove(i);
             }
-        }
+        }*/
 
-        // slice = tlAbsDialogs instanceof TLDialogsSlice;
-
+        if(tlAbsDialogs instanceof TLDialogsSlice)
+            this.count = ((TLDialogsSlice) tlAbsDialogs).getCount();
 
         dialogs = Collections.unmodifiableList(dialogs);
         messages = Collections.unmodifiableList(messages);
         users = Collections.unmodifiableList(users);
+        chats = Collections.unmodifiableList(chats);
     }
 
     /*public boolean isSlice() {
         return slice;
+    }*/
+
+    /*public MessagesDialogs(MessagesDialogs ... slices) {
+
+        if(slices.length > 0) {
+
+            count = slices[0].count;
+
+            for(MessagesDialogs slice : slices) {
+                if(!slice.isSlice() || slice.count.intValue() != count)
+                    throw new IllegalArgumentException();
+
+                this.users.addAll(slice.users);
+                this.dialogs.addAll(slice.dialogs);
+                this.messages.addAll(slice.messages);
+                this.chatsCount += slice.chatsCount;
+            }
+
+            if(count > this.users.size())
+                throw new IllegalArgumentException();
+
+            if(count == this.messages.size())
+                count = null;
+        }
+
+        dialogs = Collections.unmodifiableList(dialogs);
+        messages = Collections.unmodifiableList(messages);
+        users = Collections.unmodifiableList(users);
     }*/
 
     public List<Dialog> getDialogs() {
@@ -103,5 +137,17 @@ public class MessagesDialogs {
 
     public List<User> getUsers() {
         return users;
+    }
+
+    public Integer getCount() {
+        return count;
+    }
+
+    public boolean isSlice() {
+        return count != null;
+    }
+
+    public List<Chat> getChats() {
+        return chats;
     }
 }

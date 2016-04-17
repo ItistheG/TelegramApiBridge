@@ -4,7 +4,6 @@ import org.javagram.core.MemoryApiState;
 import org.javagram.core.StaticContainer;
 import org.javagram.handlers.IncomingMessageHandler;
 import org.javagram.response.*;
-import org.javagram.response.MessagesDialogs;
 import org.javagram.response.object.*;
 import org.telegram.api.*;
 import org.telegram.api.TLAbsMessage;
@@ -25,14 +24,16 @@ import org.telegram.tl.TLIntVector;
 import org.telegram.tl.TLStringVector;
 import org.telegram.tl.TLVector;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 /**
  * Created by Danya on 04.09.2015.
  */
-public class TelegramApiBridge
+public class TelegramApiBridge implements Closeable
 {
     private String langCode = "ru";
 
@@ -172,7 +173,7 @@ public class TelegramApiBridge
     {
         TLRequestAccountUpdateProfile request = new TLRequestAccountUpdateProfile(firstName, lastName);
         TLAbsUser absUser = api.doRpcCall(request);
-        return new User((TLUserSelf) absUser);
+        return new UserSelf((TLUserSelf) absUser);
     }
 
     /**
@@ -216,7 +217,7 @@ public class TelegramApiBridge
      * @return ArrayList<UserContact>
      * @throws IOException
      */
-    public ArrayList<UserContact> contactsGetContacts(String hash) throws IOException
+    protected ArrayList<UserContact> contactsGetContacts(String hash) throws IOException
     {
         ArrayList<UserContact> userContacts = new ArrayList<>();
         TLRequestContactsGetContacts getContacts = new TLRequestContactsGetContacts("");
@@ -228,10 +229,10 @@ public class TelegramApiBridge
                 TLUserContact userContact = (TLUserContact) absUser;
                 userContacts.add(new UserContact(userContact));
             }
-            else if(absUser instanceof TLUserSelf) {
+           /* else if(absUser instanceof TLUserSelf) {
                 TLUserSelf userSelf = (TLUserSelf) absUser;
                 userContacts.add(new UserContact(userSelf));
-            }
+            }*/
         }
         return userContacts;
     }
@@ -275,7 +276,7 @@ public class TelegramApiBridge
      */
     public boolean messagesSetTyping(int userId, boolean isTyping) throws IOException
     {
-        TLInputPeerContact peerContact = new TLInputPeerContact(userId);
+        TLInputPeerContact peerContact = new TLInputPeerContact(userId);//TODO:Смущает. А не контакты?
         TLRequestMessagesSetTyping request = new TLRequestMessagesSetTyping(peerContact, isTyping);
         return api.doRpcCall(request) instanceof TLBoolTrue;
     }
@@ -299,18 +300,24 @@ public class TelegramApiBridge
         return messages;
     }
 
-    protected MessagesDialogs messagesGetDialogs(int offset, int maxId, int limit) throws IOException
+    public ArrayList<Message> messagesGetMessages(Integer ... messageIds) throws IOException
+    {
+        return messagesGetMessages(new ArrayList<>(Arrays.asList(messageIds)));
+    }
+
+    public MessagesDialogs messagesGetDialogs(int offset, int maxId, int limit) throws IOException
     {
         TLRequestMessagesGetDialogs request = new TLRequestMessagesGetDialogs(offset, maxId, limit);
         TLAbsDialogs tlAbsDialogs = api.doRpcCall(request);
-        if(tlAbsDialogs instanceof TLDialogsSlice)
+        /*if(tlAbsDialogs instanceof TLDialogsSlice)
             return new MessagesDialogsSlice((TLDialogsSlice)tlAbsDialogs);
         else
-            return new MessagesDialogs(tlAbsDialogs);
+            */
+        return new MessagesDialogs(tlAbsDialogs);
 
     }
 
-    private static class MessagesDialogsSlice extends MessagesDialogs {
+    /*private static class MessagesDialogsSlice extends MessagesDialogs {
 
         private int count;
 
@@ -322,19 +329,61 @@ public class TelegramApiBridge
         public int getCount() {
             return count;
         }
-    }
+    }*/
 
-    public MessagesDialogs messagesGetDialogs() throws IOException
-    {
-        int count = 0;
+    /*public MessagesDialogs messagesGetDialogs(int offset, int limit) throws IOException {
 
-        MessagesDialogs messagesDialogs = messagesGetDialogs(0, 0, count);
-        while(messagesDialogs instanceof MessagesDialogsSlice) {
-            count = ((MessagesDialogsSlice) messagesDialogs).getCount();
-            messagesDialogs = messagesGetDialogs(0, 0, count);
-        }
+        MessagesDialogs messagesDialogs = messagesGetDialogs(offset, 0, limit);
+
+        do {
+            int count = messagesDialogs.getDialogs().size() + messagesDialogs.getChatsCount();
+            offset += count;
+            limit -= count;
+            if(limit <= 0)
+                break;
+            MessagesDialogs messagesDialogs2 = messagesGetDialogs(offset, 0, limit);
+            count = messagesDialogs2.getDialogs().size() + messagesDialogs2.getChatsCount();
+            if(count == 0)
+                break;
+            messagesDialogs = new MessagesDialogs(messagesDialogs, messagesDialogs2);
+        } while(true);
 
         return messagesDialogs;
+    }*/
+
+    @Override
+    public void close() throws IOException {
+        try {
+            api.close();
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    public MessagesMessages messagesGetHistory(User peerUser, int offset, int maxId, int limit) throws IOException {
+        TLAbsInputPeer tlAbsInputPeer = User.createTLInputPeer(peerUser);
+        if(tlAbsInputPeer == null)
+            return new MessagesMessages();
+        TLRequestMessagesGetHistory tlRequestMessagesGetHistory = new TLRequestMessagesGetHistory(tlAbsInputPeer,
+                offset, maxId, limit);
+        TLAbsMessages tlAbsMessages = api.doRpcCall(tlRequestMessagesGetHistory);
+        return new MessagesMessages(tlAbsMessages);
+    }
+
+    public MessagesMessages messagesGetHistory(User peerUser) throws IOException {
+
+        int maxId = 0;
+
+        int count = 0;
+
+        MessagesMessages messagesMessages = messagesGetHistory(peerUser, 0, maxId, count);
+        while(messagesMessages.isSlice()) {
+            count = messagesMessages.getCount() - messagesMessages.getMessages().size();
+            MessagesMessages messagesMessages2 = messagesGetHistory(peerUser, messagesMessages.getMessages().size(), maxId, count);
+            messagesMessages = new MessagesMessages(messagesMessages, messagesMessages2);
+        }
+
+        return messagesMessages;
     }
 
     /**
@@ -358,7 +407,7 @@ public class TelegramApiBridge
 
     //=====================================================================
 
-    private AuthAuthorization authSignIn(String smsCode, String phoneNumber, String phoneCodeHash) throws IOException
+    public AuthAuthorization authSignIn(String smsCode, String phoneNumber, String phoneCodeHash) throws IOException
     {
         TLRequestAuthSignIn signIn = new TLRequestAuthSignIn(phoneNumber, phoneCodeHash, smsCode);
         TLAuthorization authorization = api.doRpcCallNonAuth(signIn);
@@ -369,7 +418,7 @@ public class TelegramApiBridge
         return new AuthAuthorization(authorization);
     }
 
-    private AuthAuthorization authSignUp(String smsCode, String phoneNumber, String phoneCodeHash, String firstName,
+    public AuthAuthorization authSignUp(String smsCode, String phoneNumber, String phoneCodeHash, String firstName,
         String lastName) throws IOException
     {
         TLRequestAuthSignUp signUp = new TLRequestAuthSignUp(phoneNumber, phoneCodeHash, smsCode, firstName, lastName);
