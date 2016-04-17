@@ -15,6 +15,7 @@ import java.util.List;
 /**
  * Created by HerrSergio on 16.04.2016.
  */
+@Deprecated
 public class MessagesMessages {
     private Integer count;
     private List<User> users = new ArrayList<>();

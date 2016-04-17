@@ -197,4 +197,18 @@ public abstract class User
             throw new IllegalArgumentException("Unsupported user type");
         }
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof User) {
+            return this.getId() == ((User) obj).getId();
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getId();
+    }
 }

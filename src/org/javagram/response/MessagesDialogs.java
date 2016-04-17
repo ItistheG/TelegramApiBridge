@@ -14,6 +14,7 @@ import java.util.List;
 /**
  * Created by HerrSergio on 14.04.2016.
  */
+@Deprecated
 public class MessagesDialogs {
 
     private List<Dialog> dialogs = new ArrayList<>();
@@ -48,11 +49,7 @@ public class MessagesDialogs {
 
             } else if(tlDialog.getPeer() instanceof TLPeerChat) {
 
-                if(message.getToPeerChatId().intValue() != dialog.getPeerChatId().intValue())
-                    throw new InconsistentDataException();
 
-                dialogs.add(dialog);
-                messages.add(message);
 
             } else {
                 throw new InconsistentDataException();
@@ -66,8 +63,7 @@ public class MessagesDialogs {
 
                 for (int i = 0; i < messages.size(); i++) {
                     Message message = messages.get(i);
-                    if(!message.isSentToUser())
-                        continue;
+
                     if (message.getFromId() == tlAbsUser.getId()
                             || message.getToPeerUserId() == tlAbsUser.getId()) {
                         users.add(User.createUser(tlAbsUser));

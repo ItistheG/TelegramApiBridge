@@ -26,9 +26,7 @@ import org.telegram.tl.TLVector;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Created by Danya on 04.09.2015.
@@ -287,7 +285,7 @@ public class TelegramApiBridge implements Closeable
      * @return
      * @throws IOException
      */
-    public ArrayList<Message> messagesGetMessages(ArrayList<Integer> messageIds) throws IOException
+    public ArrayList<Message> messagesGetMessages(Collection<Integer> messageIds) throws IOException
     {
         TLIntVector intVector = new TLIntVector();
         intVector.addAll(messageIds);
@@ -305,50 +303,76 @@ public class TelegramApiBridge implements Closeable
         return messagesGetMessages(new ArrayList<>(Arrays.asList(messageIds)));
     }
 
-    public MessagesDialogs messagesGetDialogs(int offset, int maxId, int limit) throws IOException
+    protected Integer messagesGetDialogs(Collection<MessagesDialog> messages, int offset, int maxId, int limit, Map<Integer, User> users) throws IOException
     {
         TLRequestMessagesGetDialogs request = new TLRequestMessagesGetDialogs(offset, maxId, limit);
         TLAbsDialogs tlAbsDialogs = api.doRpcCall(request);
-        /*if(tlAbsDialogs instanceof TLDialogsSlice)
-            return new MessagesDialogsSlice((TLDialogsSlice)tlAbsDialogs);
+        ArrayList<MessagesDialog> list = MessagesDialog.create(tlAbsDialogs, users);
+        messages.addAll(list);
+        if(tlAbsDialogs.getMessages().size() > 0)
+            return tlAbsDialogs.getMessages().get(tlAbsDialogs.getMessages().size() - 1).getId();
         else
-            */
-        return new MessagesDialogs(tlAbsDialogs);
-
+            return null;
     }
 
-    /*private static class MessagesDialogsSlice extends MessagesDialogs {
+    public ArrayList<MessagesDialog> messagesGetDialogs(int maxTopMessageId, int count) throws IOException {
+        Map<Integer, User> users = new HashMap<>();
+        ArrayList<MessagesDialog> dialogs = new ArrayList<>();
 
-        private int count;
-
-        public MessagesDialogsSlice(TLDialogsSlice tlAbsDialogs) {
-            super(tlAbsDialogs);
-            count = tlAbsDialogs.getCount();
+        for(Integer lastId = messagesGetDialogs(dialogs, 0, maxTopMessageId, count, users);
+                lastId != null && count > dialogs.size();
+                lastId = messagesGetDialogs(dialogs, 0, lastId, count, users)
+                ) {
+            count -= dialogs.size();
         }
 
-        public int getCount() {
-            return count;
-        }
+        return dialogs;
+    }
+
+    /*public ArrayList<MessagesDialog> messagesGetDialogsDebug(int offset, int maxId, int limit) throws IOException
+    {
+        ArrayList<MessagesDialog> list = new ArrayList<>();
+        messagesGetDialogs(list, offset, maxId, limit, null);
+        return  list;
     }*/
 
-    /*public MessagesDialogs messagesGetDialogs(int offset, int limit) throws IOException {
+    public ArrayList<MessagesMessage> messagesGetHistory(User peerUser, int offset, int maxId, int limit) throws IOException {
+        TLAbsInputPeer tlAbsInputPeer = User.createTLInputPeer(peerUser);
+        if(tlAbsInputPeer == null)
+            return null;
+        TLRequestMessagesGetHistory tlRequestMessagesGetHistory = new TLRequestMessagesGetHistory(tlAbsInputPeer,
+                offset, maxId, limit);
+        TLAbsMessages tlAbsMessages = api.doRpcCall(tlRequestMessagesGetHistory);
+        return MessagesMessage.create(tlAbsMessages, null);
+    }
 
-        MessagesDialogs messagesDialogs = messagesGetDialogs(offset, 0, limit);
+ /*   protected Integer messagesGetHistory(Collection<MessagesMessage> messages, User peerUser, int offset, int maxId, int limit, Map<Integer, User> users) throws IOException {
+        TLAbsInputPeer tlAbsInputPeer = User.createTLInputPeer(peerUser);
+        if(tlAbsInputPeer == null)
+            return null;
+        TLRequestMessagesGetHistory tlRequestMessagesGetHistory = new TLRequestMessagesGetHistory(tlAbsInputPeer,
+                offset, maxId, limit);
+        TLAbsMessages tlAbsMessages = api.doRpcCall(tlRequestMessagesGetHistory);
+        ArrayList<MessagesMessage> list = MessagesMessage.create(tlAbsMessages, users);
+        messages.addAll(list);
+        if(tlAbsMessages.getMessages().size() > 0)
+            return tlAbsMessages.getMessages().get(tlAbsMessages.getMessages().size() - 1).getId();
+        else
+            return null;
+    }
 
-        do {
-            int count = messagesDialogs.getDialogs().size() + messagesDialogs.getChatsCount();
-            offset += count;
-            limit -= count;
-            if(limit <= 0)
-                break;
-            MessagesDialogs messagesDialogs2 = messagesGetDialogs(offset, 0, limit);
-            count = messagesDialogs2.getDialogs().size() + messagesDialogs2.getChatsCount();
-            if(count == 0)
-                break;
-            messagesDialogs = new MessagesDialogs(messagesDialogs, messagesDialogs2);
-        } while(true);
+    public ArrayList<MessagesMessage> messagesGetHistory(User peerUser, int offset, int maxId, int limit) throws IOException {
+        Map<Integer, User> users = new HashMap<>();
+        ArrayList<MessagesMessage> messages = new ArrayList<>();
 
-        return messagesDialogs;
+        for(Integer lastId = messagesGetHistory(messages, peerUser, offset, maxId, limit, users);
+            lastId != null && limit > messages.size();
+            lastId = messagesGetHistory(messages, peerUser, 0, lastId, limit, users)
+                ) {
+            limit -= messages.size();
+        }
+
+        return messages;
     }*/
 
     @Override
@@ -358,32 +382,6 @@ public class TelegramApiBridge implements Closeable
         } catch (Throwable e) {
             e.printStackTrace();
         }
-    }
-
-    public MessagesMessages messagesGetHistory(User peerUser, int offset, int maxId, int limit) throws IOException {
-        TLAbsInputPeer tlAbsInputPeer = User.createTLInputPeer(peerUser);
-        if(tlAbsInputPeer == null)
-            return new MessagesMessages();
-        TLRequestMessagesGetHistory tlRequestMessagesGetHistory = new TLRequestMessagesGetHistory(tlAbsInputPeer,
-                offset, maxId, limit);
-        TLAbsMessages tlAbsMessages = api.doRpcCall(tlRequestMessagesGetHistory);
-        return new MessagesMessages(tlAbsMessages);
-    }
-
-    public MessagesMessages messagesGetHistory(User peerUser) throws IOException {
-
-        int maxId = 0;
-
-        int count = 0;
-
-        MessagesMessages messagesMessages = messagesGetHistory(peerUser, 0, maxId, count);
-        while(messagesMessages.isSlice()) {
-            count = messagesMessages.getCount() - messagesMessages.getMessages().size();
-            MessagesMessages messagesMessages2 = messagesGetHistory(peerUser, messagesMessages.getMessages().size(), maxId, count);
-            messagesMessages = new MessagesMessages(messagesMessages, messagesMessages2);
-        }
-
-        return messagesMessages;
     }
 
     /**

@@ -16,7 +16,7 @@ public class Message
 {
     private int id;
     private int fromId;
-    private Integer toPeerUserId, toPeerChatId;
+    private Integer toPeerUserId;
     private boolean out;
     private boolean unread;
     private Date date;
@@ -38,7 +38,7 @@ public class Message
             if (peer instanceof TLPeerUser) {
                 toPeerUserId = ((TLPeerUser) peer).getUserId();
             } else if (peer instanceof TLPeerChat){
-                toPeerChatId = ((TLPeerChat) peer).getChatId();
+                //toPeerChatId = ((TLPeerChat) peer).getChatId();
             }
             out = tlMessage.getOut();
             unread = tlMessage.getUnread();
@@ -54,7 +54,7 @@ public class Message
             if (peer instanceof TLPeerUser) {
                 toPeerUserId = ((TLPeerUser) peer).getUserId();
             } else if (peer instanceof TLPeerChat){
-                toPeerChatId = ((TLPeerChat) peer).getChatId();
+                //toPeerChatId = ((TLPeerChat) peer).getChatId();
             }
             out = tlMessageForwarded.getOut();
             unread = tlMessageForwarded.getUnread();
@@ -73,7 +73,7 @@ public class Message
             if (peer instanceof TLPeerUser) {
                 toPeerUserId = ((TLPeerUser) peer).getUserId();
             } else if (peer instanceof TLPeerChat){
-                toPeerChatId = ((TLPeerChat) peer).getChatId();
+                //toPeerChatId = ((TLPeerChat) peer).getChatId();
             }
             out = tlMessageService.getOut();
             unread = tlMessageService.getUnread();
@@ -122,11 +122,15 @@ public class Message
         return fwdData;
     }
 
+    public int getFwdFromId() {
+        return fwdFromId;
+    }
+
     public Integer getToPeerUserId() {
         return toPeerUserId;
     }
 
-    public Integer getToPeerChatId() {
+ /*   public Integer getToPeerChatId() {
         return toPeerChatId;
     }
 
@@ -136,5 +140,5 @@ public class Message
 
     public  boolean isSentToChat() {
         return toPeerChatId != null;
-    }
+    }*/
 }
