@@ -1,6 +1,7 @@
 package org.javagram.response.object;
 
 
+import org.javagram.response.InconsistentDataException;
 import org.telegram.api.*;
 import org.telegram.api.TLAbsMessage;
 import org.telegram.api.TLMessage;
@@ -22,6 +23,8 @@ public class Message
     private Date date;
     private String message;
 
+    private static final long DATE_MULTIPLIER = 1000;
+
     private Integer fwdFromId;
     private Date fwdData;
 
@@ -38,11 +41,11 @@ public class Message
             if (peer instanceof TLPeerUser) {
                 toPeerUserId = ((TLPeerUser) peer).getUserId();
             } else if (peer instanceof TLPeerChat){
-                //toPeerChatId = ((TLPeerChat) peer).getChatId();
+                throw new InconsistentDataException();
             }
             out = tlMessage.getOut();
             unread = tlMessage.getUnread();
-            date = new Date(tlMessage.getDate());
+            date = intToDate(tlMessage.getDate());
             message = tlMessage.getMessage();
         }
         else if(absMessage instanceof  TLMessageForwarded)
@@ -54,15 +57,15 @@ public class Message
             if (peer instanceof TLPeerUser) {
                 toPeerUserId = ((TLPeerUser) peer).getUserId();
             } else if (peer instanceof TLPeerChat){
-                //toPeerChatId = ((TLPeerChat) peer).getChatId();
+                throw new InconsistentDataException();
             }
             out = tlMessageForwarded.getOut();
             unread = tlMessageForwarded.getUnread();
-            date = new Date(tlMessageForwarded.getDate());
+            date = intToDate(tlMessageForwarded.getDate());
             message = tlMessageForwarded.getMessage();
 
             fwdFromId = tlMessageForwarded.getFwdFromId();
-            fwdData = new Date(tlMessageForwarded.getDate());
+            fwdData = intToDate(tlMessageForwarded.getDate());
         }
         else if(absMessage instanceof TLMessageService)
         {
@@ -73,11 +76,11 @@ public class Message
             if (peer instanceof TLPeerUser) {
                 toPeerUserId = ((TLPeerUser) peer).getUserId();
             } else if (peer instanceof TLPeerChat){
-                //toPeerChatId = ((TLPeerChat) peer).getChatId();
+                throw new InconsistentDataException();
             }
             out = tlMessageService.getOut();
             unread = tlMessageService.getUnread();
-            date = new Date(tlMessageService.getDate());
+            date = intToDate(tlMessageService.getDate());
             message = tlMessageService.getAction().toString();
         }
         else if(absMessage instanceof TLMessageEmpty)
@@ -130,15 +133,15 @@ public class Message
         return toPeerUserId;
     }
 
- /*   public Integer getToPeerChatId() {
-        return toPeerChatId;
+    public static int dateToInt(Date date) {
+        if(date == null)
+            return 0;
+        else
+            return (int)(date.getTime() / DATE_MULTIPLIER);
     }
 
-    public boolean isSentToUser() {
-        return toPeerUserId != null;
+    public static Date intToDate(int date) {
+        return new Date(date * DATE_MULTIPLIER);
     }
 
-    public  boolean isSentToChat() {
-        return toPeerChatId != null;
-    }*/
 }

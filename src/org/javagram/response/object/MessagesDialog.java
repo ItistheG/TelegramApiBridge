@@ -19,12 +19,12 @@ public class MessagesDialog {
     private MessagesMessage topMessage;
     private int unreadCount;
 
-    protected MessagesDialog(TLDialog tlDialog, User user, MessagesMessage message) {
+    MessagesDialog(TLDialog tlDialog, User user, MessagesMessage message) {
 
         if (tlDialog.getPeer() instanceof TLPeerUser) {
             TLPeerUser peer = (TLPeerUser) tlDialog.getPeer();
             if (user.getId() == peer.getUserId()
-                    && message.getMessage().getId() == tlDialog.getTopMessage()) {
+                    && message.getId() == tlDialog.getTopMessage()) {
 
                 peerUser = user;
                 topMessage = message;
@@ -76,8 +76,7 @@ public class MessagesDialog {
 
                 TLPeerUser tlPeerUser = (TLPeerUser)tlDialog.getPeer() ;
 
-                Message message = new Message(tlMessage);
-                MessagesMessage messagesMessage = new MessagesMessage(message, users);
+                MessagesMessage messagesMessage = new MessagesMessage(tlMessage, users);
                 MessagesDialog messagesDialog = new MessagesDialog(tlDialog, users.get(tlPeerUser.getUserId()), messagesMessage);
 
                 messagesDialogs.add(messagesDialog);

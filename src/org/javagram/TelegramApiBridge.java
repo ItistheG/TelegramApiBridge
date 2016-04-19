@@ -5,6 +5,7 @@ import org.javagram.core.StaticContainer;
 import org.javagram.handlers.IncomingMessageHandler;
 import org.javagram.response.*;
 import org.javagram.response.object.*;
+import org.javagram.response.object.MessagesMessages;
 import org.telegram.api.*;
 import org.telegram.api.TLAbsMessage;
 import org.telegram.api.auth.TLAuthorization;
@@ -303,7 +304,7 @@ public class TelegramApiBridge implements Closeable
         return messagesGetMessages(new ArrayList<>(Arrays.asList(messageIds)));
     }
 
-    protected Integer messagesGetDialogs(Collection<MessagesDialog> messages, int offset, int maxId, int limit, Map<Integer, User> users) throws IOException
+    protected Integer messagesGetDialogsSlice(Collection<MessagesDialog> messages, int offset, int maxId, int limit, Map<Integer, User> users) throws IOException
     {
         TLRequestMessagesGetDialogs request = new TLRequestMessagesGetDialogs(offset, maxId, limit);
         TLAbsDialogs tlAbsDialogs = api.doRpcCall(request);
@@ -319,9 +320,9 @@ public class TelegramApiBridge implements Closeable
         Map<Integer, User> users = new HashMap<>();
         ArrayList<MessagesDialog> dialogs = new ArrayList<>();
 
-        for(Integer lastId = messagesGetDialogs(dialogs, 0, maxTopMessageId, count, users);
+        for(Integer lastId = messagesGetDialogsSlice(dialogs, 0, maxTopMessageId, count, users);
                 lastId != null && count > dialogs.size();
-                lastId = messagesGetDialogs(dialogs, 0, lastId, count, users)
+                lastId = messagesGetDialogsSlice(dialogs, 0, lastId, count, users)
                 ) {
             count -= dialogs.size();
         }
@@ -329,53 +330,59 @@ public class TelegramApiBridge implements Closeable
         return dialogs;
     }
 
-    /*public ArrayList<MessagesDialog> messagesGetDialogsDebug(int offset, int maxId, int limit) throws IOException
-    {
-        ArrayList<MessagesDialog> list = new ArrayList<>();
-        messagesGetDialogs(list, offset, maxId, limit, null);
-        return  list;
-    }*/
-
-    public ArrayList<MessagesMessage> messagesGetHistory(User peerUser, int offset, int maxId, int limit) throws IOException {
-        TLAbsInputPeer tlAbsInputPeer = User.createTLInputPeer(peerUser);
-        if(tlAbsInputPeer == null)
-            return null;
-        TLRequestMessagesGetHistory tlRequestMessagesGetHistory = new TLRequestMessagesGetHistory(tlAbsInputPeer,
-                offset, maxId, limit);
-        TLAbsMessages tlAbsMessages = api.doRpcCall(tlRequestMessagesGetHistory);
-        return MessagesMessage.create(tlAbsMessages, null);
-    }
-
- /*   protected Integer messagesGetHistory(Collection<MessagesMessage> messages, User peerUser, int offset, int maxId, int limit, Map<Integer, User> users) throws IOException {
-        TLAbsInputPeer tlAbsInputPeer = User.createTLInputPeer(peerUser);
-        if(tlAbsInputPeer == null)
-            return null;
-        TLRequestMessagesGetHistory tlRequestMessagesGetHistory = new TLRequestMessagesGetHistory(tlAbsInputPeer,
-                offset, maxId, limit);
-        TLAbsMessages tlAbsMessages = api.doRpcCall(tlRequestMessagesGetHistory);
-        ArrayList<MessagesMessage> list = MessagesMessage.create(tlAbsMessages, users);
-        messages.addAll(list);
-        if(tlAbsMessages.getMessages().size() > 0)
-            return tlAbsMessages.getMessages().get(tlAbsMessages.getMessages().size() - 1).getId();
+    public ArrayList<MessagesDialog> messagesDialogsGetDialogs(int offset, int maxTopMessageId, int count) throws IOException {
+        //FIXME Может, это безобразие совсем уберем!?
+        if(count < 1)
+            count = 20;
+        count += offset;
+        ArrayList<MessagesDialog> list = messagesGetDialogs(maxTopMessageId, count);
+        if(list.size() > offset)
+            return new ArrayList<>(list.subList(offset, list.size()));
         else
-            return null;
+            return new ArrayList<>();
     }
 
-    public ArrayList<MessagesMessage> messagesGetHistory(User peerUser, int offset, int maxId, int limit) throws IOException {
-        Map<Integer, User> users = new HashMap<>();
-        ArrayList<MessagesMessage> messages = new ArrayList<>();
+    public ArrayList<MessagesDialog> messagesGetDialogs() throws IOException {
+        //FIXME Может, это безобразие совсем уберем!?
+        return messagesGetDialogs(0, Integer.MAX_VALUE);
+    }
 
-        for(Integer lastId = messagesGetHistory(messages, peerUser, offset, maxId, limit, users);
-            lastId != null && limit > messages.size();
-            lastId = messagesGetHistory(messages, peerUser, 0, lastId, limit, users)
-                ) {
-            limit -= messages.size();
-        }
 
-        return messages;
-    }*/
+    public MessagesMessages messagesGetHistory(User peerUser, int offset, int maxId, int limit) throws IOException {
+        TLAbsInputPeer tlAbsInputPeer = User.createTLInputPeer(peerUser);
+        if(tlAbsInputPeer == null)
+            return new MessagesMessages();
+        TLRequestMessagesGetHistory tlRequestMessagesGetHistory = new TLRequestMessagesGetHistory(tlAbsInputPeer,
+                offset, maxId, limit);
+        TLAbsMessages tlAbsMessages = api.doRpcCall(tlRequestMessagesGetHistory);
+        return new MessagesMessages(tlAbsMessages, null);
+    }
 
-    @Override
+    public MessagesMessages messagesSearch(User peerUser, String q, Date minDate, Date maxDate, int offset, int maxId, int limit) throws IOException {
+        TLAbsInputPeer tlAbsInputPeer = User.createTLInputPeer(peerUser);
+        if(tlAbsInputPeer == null)
+            return new MessagesMessages();
+        TLRequestMessagesSearch tlRequestMessagesSearch = new TLRequestMessagesSearch(tlAbsInputPeer, q,
+                new TLInputMessagesFilterEmpty(), Message.dateToInt(minDate), Message.dateToInt(maxDate), offset, maxId, limit);
+        TLAbsMessages tlAbsMessages = api.doRpcCall(tlRequestMessagesSearch);
+        return new MessagesMessages(tlAbsMessages, null);
+
+    }
+
+    public MessagesMessages messagesSearch(String q, Date minDate, Date maxDate, int offset, int maxId, int limit) throws IOException {
+        return messagesSearch(null, q, minDate, maxDate, offset, maxId, limit);
+    }
+
+    public MessagesMessages messagesSearch(User peerUser, String q, int offset, int maxId, int limit) throws IOException {
+        return messagesSearch(peerUser, q, null, null, offset, maxId, limit);
+    }
+
+    public MessagesMessages messagesSearch(String q, int offset, int maxId, int limit) throws IOException {
+        return messagesSearch(null, q, null, null, offset, maxId, limit);
+    }
+
+
+     @Override
     public void close() throws IOException {
         try {
             api.close();

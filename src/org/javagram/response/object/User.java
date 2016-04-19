@@ -184,7 +184,7 @@ public abstract class User
         {
             return null;
         }
-        else if(user instanceof UserEmpty)
+        else if(user instanceof UserEmpty || user == null)
         {
             return new TLInputPeerEmpty();
         }

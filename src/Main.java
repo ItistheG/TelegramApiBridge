@@ -2,6 +2,7 @@
 import org.javagram.TelegramApiBridge;
 import org.javagram.response.*;
 import org.javagram.response.object.*;
+import org.javagram.response.object.MessagesMessages;
 
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
@@ -77,9 +78,15 @@ public class Main
             for(MessagesDialog messagesDialog : messagesDialogList) {
                 User user =  messagesDialog.getPeerUser();
                 System.out.println(user.getClass().getSimpleName() + " : " + user);
-                List<MessagesMessage> messagesMessages = apiBridge.messagesGetHistory(user, 0, 0, 1000);
+                List<MessagesMessage> messagesMessages = apiBridge.messagesGetHistory(user, 0, 0, Integer.MAX_VALUE);
                 for(MessagesMessage message : messagesMessages)
-                    System.out.println(message.getMessage().getMessage());
+                    System.out.println(message.getMessage());
+            }
+
+            MessagesMessages messagesMessages = apiBridge.messagesSearch("слово", 0, 0, 200);
+
+            for (MessagesMessage messagesMessage : messagesMessages) {
+                System.out.println(messagesMessage.getMessage());
             }
 
             apiBridge.close();

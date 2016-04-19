@@ -7,6 +7,7 @@ import org.telegram.api.TLPeerUser;
 /**
  * Created by HerrSergio on 13.04.2016.
  */
+@Deprecated
 public class Dialog {
 
     private Integer peerUserId, peerChatId;

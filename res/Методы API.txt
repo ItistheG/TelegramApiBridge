@@ -55,8 +55,8 @@ Working with Messages
 TEST messages.setTyping	Transmits the current user typing event to the conversation partner or group
 TEST messages.getMessages	Returns a list of messages by message identifiers
 TEST messages.getDialogs	Returns a list of the current user�s conversations
-TEST messages.getHistory	Returns messages from the history of a single conversation
-TODO messages.search	Returns messages found based on a search query
++ messages.getHistory	Returns messages from the history of a single conversation
++ messages.search	Returns messages found based on a search query
 TODO messages.readHistory	Marks message history as read
 TODO messages.readMessageContents	Notifies the sender about the recipient having listened a voice message or watched a video
 - messages.deleteHistory	Deletes message history
