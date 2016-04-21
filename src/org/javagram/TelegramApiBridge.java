@@ -348,8 +348,8 @@ public class TelegramApiBridge implements Closeable
     }
 
 
-    public MessagesMessages messagesGetHistory(User peerUser, int offset, int maxId, int limit) throws IOException {
-        TLAbsInputPeer tlAbsInputPeer = User.createTLInputPeer(peerUser);
+    public MessagesMessages messagesGetHistory(InputUser inputPeerUser, int offset, int maxId, int limit) throws IOException {
+        TLAbsInputPeer tlAbsInputPeer = inputPeerUser.createTLInputPeer();
         if(tlAbsInputPeer == null)
             return new MessagesMessages();
         TLRequestMessagesGetHistory tlRequestMessagesGetHistory = new TLRequestMessagesGetHistory(tlAbsInputPeer,
@@ -358,8 +358,14 @@ public class TelegramApiBridge implements Closeable
         return new MessagesMessages(tlAbsMessages, null);
     }
 
-    public MessagesMessages messagesSearch(User peerUser, String q, Date minDate, Date maxDate, int offset, int maxId, int limit) throws IOException {
-        TLAbsInputPeer tlAbsInputPeer = User.createTLInputPeer(peerUser);
+    public MessagesMessages messagesGetHistory(User peerUser, int offset, int maxId, int limit) throws IOException {
+        return messagesGetHistory(peerUser.getInputUser(), offset, maxId, limit);
+    }
+
+    public MessagesMessages messagesSearch(InputUser inputPeerUser, String q, Date minDate, Date maxDate, int offset, int maxId, int limit) throws IOException {
+        if(inputPeerUser == null)//GlobalSearch
+            inputPeerUser = new InputUserEmpty();
+        TLAbsInputPeer tlAbsInputPeer = inputPeerUser.createTLInputPeer();
         if(tlAbsInputPeer == null)
             return new MessagesMessages();
         TLRequestMessagesSearch tlRequestMessagesSearch = new TLRequestMessagesSearch(tlAbsInputPeer, q,
@@ -369,18 +375,73 @@ public class TelegramApiBridge implements Closeable
 
     }
 
-    public MessagesMessages messagesSearch(String q, Date minDate, Date maxDate, int offset, int maxId, int limit) throws IOException {
-        return messagesSearch(null, q, minDate, maxDate, offset, maxId, limit);
+    public MessagesMessages messagesSearch(User peerUser, String q, Date minDate, Date maxDate, int offset, int maxId, int limit) throws IOException {
+        InputUser inputPeerUser = peerUser == null ? null : peerUser.getInputUser();
+        return  messagesSearch(inputPeerUser, q, minDate, maxDate, offset, maxId, limit);
+    }
+
+    public MessagesMessages messagesSearch(InputUser inputPeerUser, String q, int offset, int maxId, int limit) throws IOException {
+        return messagesSearch(inputPeerUser, q, null, null, offset, maxId, limit);
     }
 
     public MessagesMessages messagesSearch(User peerUser, String q, int offset, int maxId, int limit) throws IOException {
         return messagesSearch(peerUser, q, null, null, offset, maxId, limit);
     }
 
-    public MessagesMessages messagesSearch(String q, int offset, int maxId, int limit) throws IOException {
-        return messagesSearch(null, q, null, null, offset, maxId, limit);
+    public MessagesMessages messagesSearch(String q, Date minDate, Date maxDate, int offset, int maxId, int limit) throws IOException {
+        return messagesSearch((InputUser)null, q, minDate, maxDate, offset, maxId, limit);
     }
 
+    public MessagesMessages messagesSearch(String q, int offset, int maxId, int limit) throws IOException {
+        return messagesSearch((InputUser)null, q, null, null, offset, maxId, limit);
+    }
+
+    protected MessagesAffectedHistory messagesReadHistory(InputUser inputPeerUser, int maxId, int offset) throws IOException {
+        TLAbsInputPeer tlAbsInputPeer = inputPeerUser.createTLInputPeer();
+        TLRequestMessagesReadHistory tlRequestMessagesReadHistory = new TLRequestMessagesReadHistory(tlAbsInputPeer, maxId, offset);
+        TLAffectedHistory tlAffectedHistory = api.doRpcCall(tlRequestMessagesReadHistory);
+        return new MessagesAffectedHistory(tlAffectedHistory);
+    }
+
+    protected MessagesAffectedHistory messagesReadHistory(User peerUser, int maxId, int offset) throws IOException {
+        return messagesReadHistory(peerUser.getInputUser(), maxId, offset);
+    }
+
+    public void messagesReadHistory(InputUser inputPeerUser, int maxId) throws IOException {
+        int offset = 0;
+        do {
+            MessagesAffectedHistory messagesAffectedHistory = messagesReadHistory(inputPeerUser, maxId, offset);
+            offset = messagesAffectedHistory.getOffset();
+        } while (offset > 0);
+    }
+
+    public void messagesReadHistory(User peerUser, int maxId) throws IOException {
+        messagesReadHistory(peerUser.getInputUser(), maxId);
+    }
+
+    public void messagesReadHistory(InputUser inputPeerUser) throws IOException {
+        messagesReadHistory(inputPeerUser, 0);
+    }
+
+    public void messagesReadHistory(User peerUser) throws IOException {
+        messagesReadHistory(peerUser.getInputUser());
+    }
+
+
+
+    public ArrayList<User> usersGetUsers(Collection<InputUser> inputUsers) throws IOException {
+        TLVector<TLAbsInputUser> tlAbsInputUsers = new TLVector<>();
+        for(InputUser inputUser : inputUsers) {
+            tlAbsInputUsers.add(inputUser.createTLInputUser());
+        }
+        TLRequestUsersGetUsers tlRequestUsersGetUsers = new TLRequestUsersGetUsers(tlAbsInputUsers);
+        TLVector<TLAbsUser> tlAbsUsers = api.doRpcCall(tlRequestUsersGetUsers);
+        ArrayList<User> users = new ArrayList<User>();
+        for(TLAbsUser tlAbsUser : tlAbsUsers) {
+            users.add(User.createUser(tlAbsUser));
+        }
+        return users;
+    }
 
      @Override
     public void close() throws IOException {

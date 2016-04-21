@@ -31,4 +31,10 @@ public class UserContact extends User
     {
         return isOnline;
     }
+
+    @Override
+    public InputUserContact getInputUser() {
+        return new InputUserContact(getId());
+    }
+
 }

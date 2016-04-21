@@ -1,5 +1,7 @@
 package org.javagram.response.object;
 
+import org.javagram.response.InconsistentDataException;
+import org.telegram.api.TLAbsInputPeer;
 import org.telegram.api.TLUserDeleted;
 
 /**
@@ -9,5 +11,11 @@ public class UserDeleted extends User {
 
     public UserDeleted(TLUserDeleted userDeleted) {
         super(userDeleted);
+    }
+
+
+    @Override
+    public InputUser getInputUser() {
+        return new InputUserDeleted();
     }
 }

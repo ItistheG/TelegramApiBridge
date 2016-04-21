@@ -10,4 +10,9 @@ public class UserSelf extends User {
     public UserSelf(TLUserSelf tlUserSelf) {
         super(tlUserSelf);
     }
+
+    @Override
+    public InputUserSelf getInputUser() {
+        return new InputUserSelf();
+    }
 }

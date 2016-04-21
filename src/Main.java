@@ -7,8 +7,8 @@ import org.javagram.response.object.MessagesMessages;
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Danya on 31.07.2015.
@@ -73,14 +73,29 @@ public class Main
                 }
             }*/
 
+            Set<User> users = new HashSet<>(apiBridge.contactsGetContacts());
             List<MessagesDialog> messagesDialogList = apiBridge.messagesGetDialogs(0, Integer.MAX_VALUE);
 
             for(MessagesDialog messagesDialog : messagesDialogList) {
                 User user =  messagesDialog.getPeerUser();
                 System.out.println(user.getClass().getSimpleName() + " : " + user);
+
+                users.add(user);
+
+                if(messagesDialog.getUnreadCount() > 0)
+                    apiBridge.messagesReadHistory(user, messagesDialog.getTopMessage().getId());
+
                 List<MessagesMessage> messagesMessages = apiBridge.messagesGetHistory(user, 0, 0, Integer.MAX_VALUE);
                 for(MessagesMessage message : messagesMessages)
                     System.out.println(message.getMessage());
+            }
+
+
+            ArrayList<InputUser> inputUsers = new ArrayList<>();
+            users.forEach(user -> inputUsers.add(user.getInputUser()));
+            inputUsers.add(new InputUserSelf());
+            for(User user : apiBridge.usersGetUsers(inputUsers)) {
+                System.out.println(user);
             }
 
             MessagesMessages messagesMessages = apiBridge.messagesSearch("слово", 0, 0, 200);
@@ -88,6 +103,8 @@ public class Main
             for (MessagesMessage messagesMessage : messagesMessages) {
                 System.out.println(messagesMessage.getMessage());
             }
+
+
 
             apiBridge.close();
 
@@ -128,6 +145,8 @@ public class Main
 //        System.err.println("Update status to offline: " + apiBridge.accountUpdateStatus(true));
 //        System.err.println("Update profile: " + apiBridge.accountUpdateProfile("Даниил", "Пилипенко").toString());
 //        System.out.println("Logout: " + apiBridge.authLogOut());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

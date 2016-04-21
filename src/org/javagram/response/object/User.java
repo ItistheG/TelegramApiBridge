@@ -20,7 +20,7 @@ public abstract class User
     private String phone;
     private TLAbsUserProfilePhoto photo;
 
-    public User(TLUserContact userContact)
+    User(TLUserContact userContact)
     {
         id = userContact.getId();
         firstName = userContact.getFirstName();
@@ -29,7 +29,7 @@ public abstract class User
         photo = userContact.getPhoto();
     }
 
-    public User(TLUserSelf userSelf)
+    User(TLUserSelf userSelf)
     {
         id = userSelf.getId();
         firstName = userSelf.getFirstName();
@@ -38,7 +38,7 @@ public abstract class User
         photo = userSelf.getPhoto();
     }
 
-    public User(TLUserRequest userRequest)
+    User(TLUserRequest userRequest)
     {
         id = userRequest.getId();
         firstName = userRequest.getFirstName();
@@ -47,7 +47,7 @@ public abstract class User
         photo = userRequest.getPhoto();
     }
 
-    public User(TLUserForeign userForeign)
+    User(TLUserForeign userForeign)
     {
         id = userForeign.getId();
         firstName = userForeign.getFirstName();
@@ -56,7 +56,7 @@ public abstract class User
         photo = userForeign.getPhoto();
     }
 
-    public User(TLUserDeleted userDeleted)
+    User(TLUserDeleted userDeleted)
     {
         id = userDeleted.getId();
         firstName = userDeleted.getFirstName();
@@ -65,7 +65,7 @@ public abstract class User
         photo = null;
     }
 
-    public User(TLUserEmpty userEmpty)
+    User(TLUserEmpty userEmpty)
     {
         id = userEmpty.getId();
         firstName = "";
@@ -166,37 +166,7 @@ public abstract class User
         }
     }
 
-    public static TLAbsInputPeer createTLInputPeer(User user)
-    {
-        if(user instanceof UserSelf)
-        {
-            return new TLInputPeerSelf();
-        }
-        else if(user instanceof UserContact)
-        {
-            return new TLInputPeerContact(user.getId());
-        }
-        else if(user instanceof UserForeign)
-        {
-            return new TLInputPeerForeign(user.getId(), ((UserForeign) user).getAccessHash());
-        }
-        else if(user instanceof UserRequest)
-        {
-            return null;
-        }
-        else if(user instanceof UserEmpty || user == null)
-        {
-            return new TLInputPeerEmpty();
-        }
-        else if(user instanceof UserDeleted)
-        {
-            return null;
-        }
-        else
-        {
-            throw new IllegalArgumentException("Unsupported user type");
-        }
-    }
+    public abstract InputUser getInputUser();
 
     @Override
     public boolean equals(Object obj) {
