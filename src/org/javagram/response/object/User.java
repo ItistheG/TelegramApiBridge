@@ -12,7 +12,7 @@ import java.io.IOException;
 /**
  * Created by Danya on 20.09.2015.
  */
-public abstract class User
+public abstract class User implements InputUser, InputPeer
 {
     private int id;
     private String firstName;
@@ -165,8 +165,6 @@ public abstract class User
             throw new IllegalArgumentException("Unsupported user type");
         }
     }
-
-    public abstract InputUser getInputUser();
 
     @Override
     public boolean equals(Object obj) {

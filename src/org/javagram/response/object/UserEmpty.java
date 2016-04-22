@@ -2,6 +2,7 @@ package org.javagram.response.object;
 
 import org.telegram.api.TLAbsInputPeer;
 import org.telegram.api.TLInputPeerEmpty;
+import org.telegram.api.TLInputUserEmpty;
 import org.telegram.api.TLUserEmpty;
 
 /**
@@ -13,7 +14,12 @@ public class UserEmpty extends User {
     }
 
     @Override
-    public InputUserEmpty getInputUser() {
-        return new InputUserEmpty();
+    public TLInputUserEmpty createTLInputUser() {
+        return new TLInputUserEmpty();
+    }
+
+    @Override
+    public TLInputPeerEmpty createTLInputPeer() {
+        return new TLInputPeerEmpty();
     }
 }

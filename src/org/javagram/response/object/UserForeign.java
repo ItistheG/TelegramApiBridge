@@ -1,9 +1,6 @@
 package org.javagram.response.object;
 
-import org.telegram.api.TLAbsInputPeer;
-import org.telegram.api.TLInputPeerForeign;
-import org.telegram.api.TLUserForeign;
-import org.telegram.api.TLUserRequest;
+import org.telegram.api.*;
 
 /**
  * Created by HerrSergio on 16.04.2016.
@@ -27,7 +24,12 @@ public class UserForeign extends User {
     }
 
     @Override
-    public InputUserForeign getInputUser() {
-        return new InputUserForeign(getId(), getAccessHash());
+    public TLInputUserForeign createTLInputUser() {
+        return new TLInputUserForeign(getId(), getAccessHash());
+    }
+
+    @Override
+    public TLInputPeerForeign createTLInputPeer() {
+        return new TLInputPeerForeign(getId(), getAccessHash());
     }
 }

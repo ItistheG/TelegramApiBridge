@@ -33,8 +33,13 @@ public class UserContact extends User
     }
 
     @Override
-    public InputUserContact getInputUser() {
-        return new InputUserContact(getId());
+    public TLInputUserContact createTLInputUser() {
+        return new TLInputUserContact(getId());
+    }
+
+    @Override
+    public TLInputPeerContact createTLInputPeer() {
+        return new TLInputPeerContact(getId());
     }
 
 }

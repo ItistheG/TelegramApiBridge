@@ -22,10 +22,10 @@ public class MessagesMessage extends Message {
     MessagesMessage(TLAbsMessage tlAbsMessage, Map<Integer, User> users) {
         super(tlAbsMessage);
 
-        if(!users.containsKey(super.getFromId()) || !users.containsKey(super.getToPeerUserId())
+        /*if(!users.containsKey(super.getFromId()) || !users.containsKey(super.getToPeerUserId())
                  || super.isForwarded() && !users.containsKey(super.getFromId())
                 )
-            throw new InconsistentDataException();
+            throw new InconsistentDataException();*/
 
         this.from = users.get(super.getFromId());
         this.toPeerUser = users.get(super.getToPeerUserId());

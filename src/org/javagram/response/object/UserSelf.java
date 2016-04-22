@@ -1,5 +1,7 @@
 package org.javagram.response.object;
 
+import org.telegram.api.TLInputPeerSelf;
+import org.telegram.api.TLInputUserSelf;
 import org.telegram.api.TLUserSelf;
 
 /**
@@ -12,7 +14,12 @@ public class UserSelf extends User {
     }
 
     @Override
-    public InputUserSelf getInputUser() {
-        return new InputUserSelf();
+    public TLInputUserSelf createTLInputUser() {
+        return new TLInputUserSelf();
+    }
+
+    @Override
+    public TLInputPeerSelf createTLInputPeer() {
+        return new TLInputPeerSelf();
     }
 }

@@ -2,6 +2,7 @@ package org.javagram.response.object;
 
 import org.javagram.response.InconsistentDataException;
 import org.telegram.api.TLAbsInputPeer;
+import org.telegram.api.TLAbsInputUser;
 import org.telegram.api.TLUserDeleted;
 
 /**
@@ -15,7 +16,12 @@ public class UserDeleted extends User {
 
 
     @Override
-    public InputUser getInputUser() {
-        return new InputUserDeleted();
+    public TLAbsInputUser createTLInputUser() {
+        return null;
+    }
+
+    @Override
+    public TLAbsInputPeer createTLInputPeer() {
+        return null;
     }
 }

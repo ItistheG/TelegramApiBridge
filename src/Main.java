@@ -3,6 +3,7 @@ import org.javagram.TelegramApiBridge;
 import org.javagram.response.*;
 import org.javagram.response.object.*;
 import org.javagram.response.object.MessagesMessages;
+import org.javagram.response.object.inputs.InputUserOrPeerSelf;
 
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
@@ -92,8 +93,8 @@ public class Main
 
 
             ArrayList<InputUser> inputUsers = new ArrayList<>();
-            users.forEach(user -> inputUsers.add(user.getInputUser()));
-            inputUsers.add(new InputUserSelf());
+            users.forEach(user -> inputUsers.add(user));
+            inputUsers.add(new InputUserOrPeerSelf());
             for(User user : apiBridge.usersGetUsers(inputUsers)) {
                 System.out.println(user);
             }

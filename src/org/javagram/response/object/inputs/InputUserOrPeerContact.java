@@ -1,21 +1,20 @@
-package org.javagram.response.object;
+package org.javagram.response.object.inputs;
 
-import org.telegram.api.TLAbsInputPeer;
-import org.telegram.api.TLAbsInputUser;
+import org.javagram.response.object.InputPeer;
+import org.javagram.response.object.InputUser;
 import org.telegram.api.TLInputPeerContact;
 import org.telegram.api.TLInputUserContact;
 
 /**
- * Created by HerrSergio on 21.04.2016.
+ * Created by HerrSergio on 22.04.2016.
  */
-public class InputUserContact extends InputUser {
+public class InputUserOrPeerContact implements InputUser, InputPeer {
 
     private int id;
 
-    public InputUserContact(int id) {
+    public InputUserOrPeerContact(int id) {
         this.id = id;
     }
-
 
     public int getId() {
         return id;
