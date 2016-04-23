@@ -5,8 +5,9 @@ import org.javagram.core.StaticContainer;
 import org.javagram.handlers.IncomingMessageHandler;
 import org.javagram.response.*;
 import org.javagram.response.object.*;
-import org.javagram.response.object.MessagesMessages;
+import org.javagram.response.MessagesMessages;
 import org.javagram.response.object.inputs.InputUserOrPeerEmpty;
+import org.javagram.response.MessagesAffectedHistory;
 import org.telegram.api.*;
 import org.telegram.api.TLAbsMessage;
 import org.telegram.api.auth.TLAuthorization;
@@ -20,6 +21,7 @@ import org.telegram.api.engine.TelegramApi;
 import org.telegram.api.help.TLInviteText;
 import org.telegram.api.messages.*;
 import org.telegram.api.requests.*;
+import org.telegram.api.updates.TLAbsDifference;
 import org.telegram.api.updates.TLState;
 import org.telegram.tl.TLBoolTrue;
 import org.telegram.tl.TLIntVector;
@@ -372,26 +374,28 @@ public class TelegramApiBridge implements Closeable
         return messagesSearch(null, q, null, null, offset, maxId, limit);
     }
 
-    protected MessagesAffectedHistory messagesReadHistory(InputPeer inputPeer, int maxId, int offset) throws IOException {
+    public MessagesAffectedHistory messagesReadHistory(InputPeer inputPeer, int maxId, int offset) throws IOException {
         TLAbsInputPeer tlAbsInputPeer = inputPeer.createTLInputPeer();
         TLRequestMessagesReadHistory tlRequestMessagesReadHistory = new TLRequestMessagesReadHistory(tlAbsInputPeer, maxId, offset);
         TLAffectedHistory tlAffectedHistory = api.doRpcCall(tlRequestMessagesReadHistory);
         return new MessagesAffectedHistory(tlAffectedHistory);
     }
 
-    public void messagesReadHistory(InputPeer inputPeer, int maxId) throws IOException {
+    public MessagesAffectedHistory messagesReadHistory(InputPeer inputPeer, int maxId) throws IOException {
         int offset = 0;
+        MessagesAffectedHistory messagesAffectedHistory;
         do {
-            MessagesAffectedHistory messagesAffectedHistory = messagesReadHistory(inputPeer, maxId, offset);
+            messagesAffectedHistory = messagesReadHistory(inputPeer, maxId, offset);
             offset = messagesAffectedHistory.getOffset();
         } while (offset > 0);
+        return messagesAffectedHistory;
     }
 
-    public void messagesReadHistory(InputPeer inputPeer) throws IOException {
-        messagesReadHistory(inputPeer, 0);
+    public MessagesAffectedHistory messagesReadHistory(InputPeer inputPeer) throws IOException {
+        return messagesReadHistory(inputPeer, 0);
     }
 
-    public ArrayList<User> usersGetUsers(Collection<InputUser> inputUsers) throws IOException {
+    public ArrayList<User> usersGetUsers(Collection<? extends InputUser> inputUsers) throws IOException {
         TLVector<TLAbsInputUser> tlAbsInputUsers = new TLVector<>();
         for(InputUser inputUser : inputUsers) {
             tlAbsInputUsers.add(inputUser.createTLInputUser());
@@ -405,12 +409,30 @@ public class TelegramApiBridge implements Closeable
         return users;
     }
 
-     @Override
+    public UpdatesState updatesGetState() throws IOException {
+        TLRequestUpdatesGetState tlRequestUpdatesGetState = new TLRequestUpdatesGetState();
+        TLState tlState = api.doRpcCall(tlRequestUpdatesGetState);
+        return new UpdatesState(tlState);
+    }
+
+    public UpdatesDifference updatesGetDifference(int pts, Date date, int qts) throws IOException {
+        TLRequestUpdatesGetDifference tlRequestUpdatesGetDifference = new TLRequestUpdatesGetDifference(pts, Message.dateToInt(date), qts);
+        TLAbsDifference tlAbsDifference = api.doRpcCall(tlRequestUpdatesGetDifference);
+        return new UpdatesDifference(tlAbsDifference, null);
+    }
+
+    public UpdatesDifference updatesGetDifference(UpdatesState updatesState) throws IOException {
+        return updatesGetDifference(updatesState.getPts(), updatesState.getDate(), updatesState.getQts());
+    }
+
+    @Override
     public void close() throws IOException {
         try {
             api.close();
         } catch (Throwable e) {
             e.printStackTrace();
+        } finally {
+            StaticContainer.setTelegramApi(null);
         }
     }
 

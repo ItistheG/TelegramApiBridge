@@ -19,7 +19,7 @@ public class MessagesMessage extends Message {
     private User toPeerUser;
     private User fwdFrom;
 
-    MessagesMessage(TLAbsMessage tlAbsMessage, Map<Integer, User> users) {
+    public MessagesMessage(TLAbsMessage tlAbsMessage, Map<Integer, User> users) {
         super(tlAbsMessage);
 
         /*if(!users.containsKey(super.getFromId()) || !users.containsKey(super.getToPeerUserId())

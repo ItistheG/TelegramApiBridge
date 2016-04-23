@@ -2,14 +2,13 @@
 import org.javagram.TelegramApiBridge;
 import org.javagram.response.*;
 import org.javagram.response.object.*;
-import org.javagram.response.object.MessagesMessages;
+import org.javagram.response.MessagesMessages;
 import org.javagram.response.object.inputs.InputUserOrPeerSelf;
 
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by Danya on 31.07.2015.
@@ -66,6 +65,12 @@ public class Main
                 System.err.println("You've signed up; name: " + auth.getUser().toString());
             }
 
+            UpdatesState updatesState = apiBridge.updatesGetState();
+
+
+
+
+
            /* List<MessagesDialog> messagesDialogsDbg = apiBridge.messagesGetDialogsDebug(0, 0, 20);
             for(MessagesDialog dlg : messagesDialogsDbg) {
                 List<MessagesDialog> list = apiBridge.messagesGetDialogsDebug(0, dlg.getTopMessage().getId(), 2);
@@ -77,19 +82,27 @@ public class Main
             Set<User> users = new HashSet<>(apiBridge.contactsGetContacts());
             List<MessagesDialog> messagesDialogList = apiBridge.messagesGetDialogs(0, Integer.MAX_VALUE);
 
+            UpdatesDifference updatesDifference = apiBridge.updatesGetDifference(updatesState);
+            UpdatesState updatesState2 = apiBridge.updatesGetState();
+
             for(MessagesDialog messagesDialog : messagesDialogList) {
                 User user =  messagesDialog.getPeerUser();
                 System.out.println(user.getClass().getSimpleName() + " : " + user);
 
                 users.add(user);
 
-                if(messagesDialog.getUnreadCount() > 0)
+                if(messagesDialog.getUnreadCount() > 0) {
                     apiBridge.messagesReadHistory(user, messagesDialog.getTopMessage().getId());
+                }
 
                 List<MessagesMessage> messagesMessages = apiBridge.messagesGetHistory(user, 0, 0, Integer.MAX_VALUE);
                 for(MessagesMessage message : messagesMessages)
                     System.out.println(message.getMessage());
             }
+
+            UpdatesDifference updatesDifference2 = apiBridge.updatesGetDifference(updatesState);
+            UpdatesDifference updatesDifference3 = apiBridge.updatesGetDifference(updatesState);
+            UpdatesState updatesState3 = apiBridge.updatesGetState();
 
 
             ArrayList<InputUser> inputUsers = new ArrayList<>();

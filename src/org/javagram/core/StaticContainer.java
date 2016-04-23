@@ -9,11 +9,14 @@ public class StaticContainer
 {
     private static TelegramApi telegramApi;
 
-    public static TelegramApi getTelegramApi() {
+    public synchronized static TelegramApi getTelegramApi() {
         return telegramApi;
     }
 
-    public static void setTelegramApi(TelegramApi telegramApi) {
+    public synchronized static void setTelegramApi(TelegramApi telegramApi) {
+        if(telegramApi != null && StaticContainer.telegramApi != null) {
+            throw new IllegalStateException("Only one ApiBridge allowed at time");
+        }
         StaticContainer.telegramApi = telegramApi;
     }
 }

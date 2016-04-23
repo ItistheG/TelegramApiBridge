@@ -1,4 +1,4 @@
-package org.javagram.response.object;
+package org.javagram.response;
 
 import org.telegram.api.messages.TLAffectedHistory;
 
@@ -26,6 +26,6 @@ public class MessagesAffectedHistory {
     }
 
     public int getOffset() {
-        return offset;
+       return offset;
     }
 }

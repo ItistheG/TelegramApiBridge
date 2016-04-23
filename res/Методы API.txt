@@ -106,8 +106,8 @@ Working with Geochats
 
 Working with Updates
 
-TODO updates.getState	Returns the current status of updates
-TODO updates.getDifference	Returns the difference between the current and transmitted statuses of updates
+TEST updates.getState	Returns the current status of updates
+TEST updates.getDifference	Returns the difference between the current and transmitted statuses of updates
 
 Working with Files
 
