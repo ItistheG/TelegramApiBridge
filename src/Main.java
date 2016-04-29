@@ -82,7 +82,7 @@ public class Main
             Set<User> users = new HashSet<>(apiBridge.contactsGetContacts());
             List<MessagesDialog> messagesDialogList = apiBridge.messagesGetDialogs(0, Integer.MAX_VALUE);
 
-            UpdatesDifference updatesDifference = apiBridge.updatesGetDifference(updatesState);
+            UpdatesAbsDifference updatesDifference = apiBridge.updatesGetDifference(updatesState);
             UpdatesState updatesState2 = apiBridge.updatesGetState();
 
             for(MessagesDialog messagesDialog : messagesDialogList) {
@@ -95,13 +95,13 @@ public class Main
                     apiBridge.messagesReadHistory(user, messagesDialog.getTopMessage().getId());
                 }
 
-                List<MessagesMessage> messagesMessages = apiBridge.messagesGetHistory(user, 0, 0, Integer.MAX_VALUE);
+                List<MessagesMessage> messagesMessages = apiBridge.messagesGetHistory(user, 0, 0, Integer.MAX_VALUE).getMessages();
                 for(MessagesMessage message : messagesMessages)
                     System.out.println(message.getMessage());
             }
 
-            UpdatesDifference updatesDifference2 = apiBridge.updatesGetDifference(updatesState);
-            UpdatesDifference updatesDifference3 = apiBridge.updatesGetDifference(updatesState);
+            UpdatesAbsDifference updatesDifference2 = apiBridge.updatesGetDifference(updatesState);
+            UpdatesAbsDifference updatesDifference3 = apiBridge.updatesGetDifference(updatesState);
             UpdatesState updatesState3 = apiBridge.updatesGetState();
 
 
@@ -114,7 +114,7 @@ public class Main
 
             MessagesMessages messagesMessages = apiBridge.messagesSearch("слово", 0, 0, 200);
 
-            for (MessagesMessage messagesMessage : messagesMessages) {
+            for (MessagesMessage messagesMessage : messagesMessages.getMessages()) {
                 System.out.println(messagesMessage.getMessage());
             }
 
@@ -134,7 +134,7 @@ public class Main
             ArrayList<ContactStatus> statuses = apiBridge.contactsGetStatuses();
             for (ContactStatus status : statuses) {
                 System.err.println("\t" + status.getUserId() + " - " +
-                        (status.getExpires() > System.currentTimeMillis() / 1000));
+                        (status.getExpires().getTime() > System.currentTimeMillis()));
             }
 
             ArrayList<UserContact> contacts = apiBridge.contactsGetContacts();

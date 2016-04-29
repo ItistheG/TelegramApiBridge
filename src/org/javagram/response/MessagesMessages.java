@@ -1,48 +1,40 @@
 package org.javagram.response;
 
-import org.javagram.response.InconsistentDataException;
 import org.javagram.response.object.MessagesMessage;
 import org.javagram.response.object.User;
-import org.telegram.api.TLAbsMessage;
-import org.telegram.api.TLAbsUser;
 import org.telegram.api.messages.TLAbsMessages;
 import org.telegram.api.messages.TLMessagesSlice;
-import org.telegram.api.updates.TLAbsDifference;
-import org.telegram.api.updates.TLDifference;
-import org.telegram.api.updates.TLDifferenceEmpty;
-import org.telegram.api.updates.TLDifferenceSlice;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by HerrSergio on 19.04.2016.
  */
-public class MessagesMessages extends ArrayList<MessagesMessage> {
+public class MessagesMessages {
     private int totalCount;
     private boolean slice;
+    private ArrayList<MessagesMessage> messages = new ArrayList<>();
+    private HashSet<User> users = new HashSet<>();
 
     public MessagesMessages() {
 
     }
 
 
-    public int getTotalCount() {
+   /* public int getTotalCount() {
         return totalCount;
     }
-
+*/
     public boolean isSlice() {
         return slice;
     }
 
-    public MessagesMessages(TLAbsMessages tlAbsMessages, Map<Integer, User> users) {
+    public MessagesMessages(TLAbsMessages tlAbsMessages, Map<Integer, User> users/*, Set<? super User> detectedUsers*/) {
 
-        if(users == null)
-            users = new HashMap<>();
+       // if(users == null)
+         //   users = new HashMap<>();
 
-        acceptTLAbsMessages(tlAbsMessages.getUsers(), tlAbsMessages.getMessages(), users);
+        Helper.acceptTLAbsMessages(messages, tlAbsMessages.getUsers(), tlAbsMessages.getMessages(), users, this.users);
 
         if(tlAbsMessages instanceof TLMessagesSlice) {
             this.totalCount = ((TLMessagesSlice) tlAbsMessages).getCount();
@@ -51,21 +43,15 @@ public class MessagesMessages extends ArrayList<MessagesMessage> {
             this.totalCount = tlAbsMessages.getMessages().size();
             this.slice = false;
         }
+
+       // this.users = Helper.getUsers(messages);
     }
 
-
-
-    private void acceptTLAbsMessages(List<TLAbsUser> tlAbsUserList, List<TLAbsMessage> tlAbsMessageList, Map<Integer, User> users) {
-
-        for(TLAbsUser tlAbsUser : tlAbsUserList) {
-            User user = User.createUser(tlAbsUser);
-            users.putIfAbsent(user.getId(), user);
-        }
-
-        for(TLAbsMessage tlAbsMessage : tlAbsMessageList) {
-            MessagesMessage messagesMessage = new MessagesMessage(tlAbsMessage, users);
-            this.add(messagesMessage);
-        }
+    public ArrayList<MessagesMessage> getMessages() {
+        return messages;
     }
 
+    public HashSet<User> getUsers() {
+        return users;
+    }
 }

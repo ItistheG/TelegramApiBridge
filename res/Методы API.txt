@@ -28,7 +28,7 @@ Working with Notifications. Settings
 
 Working with Users
 
-TODO users.getUsers	Returns basic information about users based on their identifiers
+TEST users.getUsers	Returns basic information about users based on their identifiers
 TODO users.getFullUser	Returns extended user information based on a user identifier
 - photos.getUserPhotos	Returns a list of user photos
 TODO account.checkUsername	Validates username, checks availability

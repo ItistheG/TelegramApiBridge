@@ -8,6 +8,7 @@ import org.telegram.tl.TLVector;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -76,7 +77,7 @@ public class MessagesDialog {
 
                 TLPeerUser tlPeerUser = (TLPeerUser)tlDialog.getPeer() ;
 
-                MessagesMessage messagesMessage = new MessagesMessage(tlMessage, users);
+                MessagesMessage messagesMessage = new MessagesMessage(tlMessage, users, new HashSet<>());
                 MessagesDialog messagesDialog = new MessagesDialog(tlDialog, users.get(tlPeerUser.getUserId()), messagesMessage);
 
                 messagesDialogs.add(messagesDialog);

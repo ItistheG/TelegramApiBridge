@@ -1,6 +1,7 @@
 package org.javagram.response.object;
 
 
+import org.javagram.response.ExpectedInconsistentDataException;
 import org.javagram.response.InconsistentDataException;
 import org.telegram.api.*;
 import org.telegram.api.TLAbsMessage;
@@ -41,7 +42,9 @@ public class Message
             if (peer instanceof TLPeerUser) {
                 toPeerUserId = ((TLPeerUser) peer).getUserId();
             } else if (peer instanceof TLPeerChat){
-                throw new InconsistentDataException();
+                throw new ExpectedInconsistentDataException();
+            } else {
+                throw  new InconsistentDataException();
             }
             out = tlMessage.getOut();
             unread = tlMessage.getUnread();
@@ -57,7 +60,9 @@ public class Message
             if (peer instanceof TLPeerUser) {
                 toPeerUserId = ((TLPeerUser) peer).getUserId();
             } else if (peer instanceof TLPeerChat){
-                throw new InconsistentDataException();
+                throw new ExpectedInconsistentDataException();
+            } else {
+                throw  new InconsistentDataException();
             }
             out = tlMessageForwarded.getOut();
             unread = tlMessageForwarded.getUnread();
@@ -76,7 +81,9 @@ public class Message
             if (peer instanceof TLPeerUser) {
                 toPeerUserId = ((TLPeerUser) peer).getUserId();
             } else if (peer instanceof TLPeerChat){
-                throw new InconsistentDataException();
+                throw new ExpectedInconsistentDataException();
+            } else {
+                throw  new InconsistentDataException();
             }
             out = tlMessageService.getOut();
             unread = tlMessageService.getUnread();

@@ -265,7 +265,7 @@ public class TelegramApiBridge implements Closeable
     {
         TLInputPeerContact peerContact = new TLInputPeerContact(userId);
         TLRequestMessagesSendMessage request = new TLRequestMessagesSendMessage(peerContact, message, randomId);
-        TLSentMessage sentMessage = (TLSentMessage) api.doRpcCall(request);
+        TLAbsSentMessage sentMessage = /*(TLSentMessage) */api.doRpcCall(request);
         return new MessagesSentMessage(sentMessage);
     }
 
@@ -415,13 +415,13 @@ public class TelegramApiBridge implements Closeable
         return new UpdatesState(tlState);
     }
 
-    public UpdatesDifference updatesGetDifference(int pts, Date date, int qts) throws IOException {
+    public UpdatesAbsDifference updatesGetDifference(int pts, Date date, int qts) throws IOException {
         TLRequestUpdatesGetDifference tlRequestUpdatesGetDifference = new TLRequestUpdatesGetDifference(pts, Message.dateToInt(date), qts);
         TLAbsDifference tlAbsDifference = api.doRpcCall(tlRequestUpdatesGetDifference);
-        return new UpdatesDifference(tlAbsDifference, null);
+        return UpdatesAbsDifference.create(tlAbsDifference/*, null*/);
     }
 
-    public UpdatesDifference updatesGetDifference(UpdatesState updatesState) throws IOException {
+    public UpdatesAbsDifference updatesGetDifference(UpdatesState updatesState) throws IOException {
         return updatesGetDifference(updatesState.getPts(), updatesState.getDate(), updatesState.getQts());
     }
 
