@@ -1,8 +1,8 @@
 package org.javagram.response;
 
+import org.javagram.response.object.Message;
 import org.javagram.response.object.MessagesMessage;
 import org.javagram.response.object.User;
-import org.javagram.response.object.UserStatus;
 import org.javagram.response.object.updates.*;
 import org.telegram.api.*;
 
@@ -100,18 +100,29 @@ class Helper {
                 TLUpdateUserStatus tlUpdateUserStatus = (TLUpdateUserStatus)tlAbsUpdate;
                 User user = users.get(tlUpdateUserStatus.getUserId());
                 users2.add(user);
-                updates.add(new UpdateUserStatus(user, UserStatus.create(tlUpdateUserStatus.getStatus())));
+                updates.add(new UpdateUserStatus(user, getExpires(tlUpdateUserStatus.getStatus())));
             } else if(tlAbsUpdate instanceof TLUpdateMessageID) {
                 TLUpdateMessageID tlUpdateMessageID = (TLUpdateMessageID)tlAbsUpdate;
                 if(messagesMessages.containsKey(tlUpdateMessageID.getId()))
-                    updates.add(new UpdateMessageID(tlUpdateMessageID.getId(),
-                            messagesMessages.get(tlUpdateMessageID.getId()), tlUpdateMessageID.getRandomId()));
+                    updates.add(new UpdateMessageID(messagesMessages.get(tlUpdateMessageID.getId()), tlUpdateMessageID.getRandomId()));
             } else {
 
             }
         }
 
         //return updates;
+    }
+
+    static Date getExpires(TLAbsUserStatus tlAbsUserStatus) {
+        if(tlAbsUserStatus instanceof TLUserStatusOnline) {
+            return Message.intToDate(((TLUserStatusOnline) tlAbsUserStatus).getExpires());
+        } else if(tlAbsUserStatus instanceof TLUserStatusOffline) {
+            return Message.intToDate(((TLUserStatusOffline) tlAbsUserStatus).getWasOnline());
+        } else if(tlAbsUserStatus instanceof TLUserStatusEmpty) {
+            return null;
+        } else {
+            throw new InconsistentDataException();
+        }
     }
 
     static Map<Integer, MessagesMessage> createMessagesMap(Collection<? extends MessagesMessage> collection) {

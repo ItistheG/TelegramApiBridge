@@ -1,5 +1,6 @@
-package org.javagram.response.object;
+package org.javagram.response.object.statuses;
 
+import org.javagram.response.object.Message;
 import org.telegram.api.TLUserStatusOnline;
 
 import java.util.Date;

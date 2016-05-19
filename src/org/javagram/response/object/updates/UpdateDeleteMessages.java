@@ -17,7 +17,7 @@ public class UpdateDeleteMessages implements Update {
         this.messages = new ArrayList<>(messages);
     }
 
-    public ArrayList<MessagesMessage> getMessage() {
+    public ArrayList<MessagesMessage> getMessages() {
         return messages;
     }
 

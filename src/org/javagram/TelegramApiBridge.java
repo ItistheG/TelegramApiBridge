@@ -425,6 +425,19 @@ public class TelegramApiBridge implements Closeable
         return updatesGetDifference(updatesState.getPts(), updatesState.getDate(), updatesState.getQts());
     }
 
+    public ArrayList<Integer> messagesReceivedMessages(int maxId) throws IOException {
+        TLRequestMessagesReceivedMessages tlRequestMessagesReceivedMessages = new TLRequestMessagesReceivedMessages(maxId);
+        TLIntVector tlIntVector = api.doRpcCall(tlRequestMessagesReceivedMessages);
+        return new ArrayList<>(tlIntVector);
+    }
+
+    public UserFull usersGetFullUser(InputUser inputUser) throws IOException {
+        TLRequestUsersGetFullUser tlRequestUsersGetFullUser = new TLRequestUsersGetFullUser(inputUser.createTLInputUser());
+        TLUserFull tlUserFull = api.doRpcCall(tlRequestUsersGetFullUser);
+        return new UserFull(tlUserFull);
+    }
+
+
     @Override
     public void close() throws IOException {
         try {

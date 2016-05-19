@@ -1,6 +1,8 @@
-package org.javagram.response.object;
+package org.javagram.response.object.statuses;
 
 import org.telegram.api.TLUserStatusEmpty;
+
+import java.util.Date;
 
 /**
  * Created by HerrSergio on 28.04.2016.

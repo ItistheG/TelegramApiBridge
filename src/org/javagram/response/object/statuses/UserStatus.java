@@ -1,4 +1,4 @@
-package org.javagram.response.object;
+package org.javagram.response.object.statuses;
 
 import org.javagram.response.InconsistentDataException;
 import org.telegram.api.TLAbsUserStatus;
@@ -6,9 +6,12 @@ import org.telegram.api.TLUserStatusEmpty;
 import org.telegram.api.TLUserStatusOffline;
 import org.telegram.api.TLUserStatusOnline;
 
+import java.util.Date;
+
 /**
  * Created by HerrSergio on 27.04.2016.
  */
+@Deprecated
 public interface UserStatus {
 
     static UserStatus create(TLAbsUserStatus tlAbsUserStatus) {
@@ -22,4 +25,5 @@ public interface UserStatus {
             throw new InconsistentDataException();
         }
     }
+
 }

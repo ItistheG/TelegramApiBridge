@@ -58,10 +58,10 @@ TEST messages.getDialogs	Returns a list of the current user�s conversations
 + messages.getHistory	Returns messages from the history of a single conversation
 + messages.search	Returns messages found based on a search query
 TEST messages.readHistory	Marks message history as read
-TODO messages.readMessageContents	Notifies the sender about the recipient having listened a voice message or watched a video
+Отсутствует в API messages.readMessageContents	Notifies the sender about the recipient having listened a voice message or watched a video
 - messages.deleteHistory	Deletes message history
 - messages.deleteMessages	Deletes messages by message identifiers
-TODO messages.receivedMessages	Confirms that a client has received messages and cancels push notifications
+TEST? messages.receivedMessages	Confirms that a client has received messages and cancels push notifications
 - messages.forwardMessage	Forwards a single message
 - messages.forwardMessages	Forwards messages by message identifiers
 - messages.sendBroadcast	Sends messages out to multiple contacts

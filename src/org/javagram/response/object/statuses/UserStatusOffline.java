@@ -1,4 +1,4 @@
-package org.javagram.response.object;
+package org.javagram.response.object.statuses;
 
 import org.telegram.api.TLUserStatusOffline;
 
@@ -18,4 +18,5 @@ public class UserStatusOffline implements UserStatus {
     public Date getWasOnline() {
         return wasOnline;
     }
+
 }

@@ -7,20 +7,12 @@ import org.javagram.response.object.MessagesMessage;
  * Created by HerrSergio on 27.04.2016.
  */
 public class UpdateMessageID implements Update {
-    private int id;
     private MessagesMessage message;
     private long randomId;
 
-    public UpdateMessageID(int id, MessagesMessage message, long randomId) {
-        if(id != message.getId())
-            throw new InconsistentDataException();
+    public UpdateMessageID(MessagesMessage message, long randomId) {
         this.message = message;
-        this.id = id;
         this.randomId = randomId;
-    }
-
-    public int getId() {
-        return id;
     }
 
     public long getRandomId() {

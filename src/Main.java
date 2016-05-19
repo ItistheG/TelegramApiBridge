@@ -32,7 +32,9 @@ public class Main
             BufferedReader bReader = new BufferedReader(new InputStreamReader(System.in))
         ) {
 
-            String phoneNumber = "79876497774";
+            String phoneNumber =
+                    "79173314167";
+            // "79876497774";
 
             //Sending validation code
             try {
@@ -65,25 +67,15 @@ public class Main
                 System.err.println("You've signed up; name: " + auth.getUser().toString());
             }
 
+            apiBridge.setIncomingMessageHandler(new IncMessageHandler());
+
             UpdatesState updatesState = apiBridge.updatesGetState();
 
-
-
-
-
-           /* List<MessagesDialog> messagesDialogsDbg = apiBridge.messagesGetDialogsDebug(0, 0, 20);
-            for(MessagesDialog dlg : messagesDialogsDbg) {
-                List<MessagesDialog> list = apiBridge.messagesGetDialogsDebug(0, dlg.getTopMessage().getId(), 2);
-                for(MessagesDialog d : list) {
-                    System.out.println(d.getTopMessage().getMessage());
-                }
-            }*/
 
             Set<User> users = new HashSet<>(apiBridge.contactsGetContacts());
             List<MessagesDialog> messagesDialogList = apiBridge.messagesGetDialogs(0, Integer.MAX_VALUE);
 
             UpdatesAbsDifference updatesDifference = apiBridge.updatesGetDifference(updatesState);
-            UpdatesState updatesState2 = apiBridge.updatesGetState();
 
             for(MessagesDialog messagesDialog : messagesDialogList) {
                 User user =  messagesDialog.getPeerUser();
@@ -98,11 +90,12 @@ public class Main
                 List<MessagesMessage> messagesMessages = apiBridge.messagesGetHistory(user, 0, 0, Integer.MAX_VALUE).getMessages();
                 for(MessagesMessage message : messagesMessages)
                     System.out.println(message.getMessage());
-            }
 
-            UpdatesAbsDifference updatesDifference2 = apiBridge.updatesGetDifference(updatesState);
-            UpdatesAbsDifference updatesDifference3 = apiBridge.updatesGetDifference(updatesState);
-            UpdatesState updatesState3 = apiBridge.updatesGetState();
+                /*if(messagesMessages.size() > 0) {
+                    MessagesMessage messagesMessage = messagesMessages.get(0);
+                    apiBridge.messagesReceivedMessages(messagesMessage.getId());
+                }*/
+            }
 
 
             ArrayList<InputUser> inputUsers = new ArrayList<>();
@@ -110,7 +103,14 @@ public class Main
             inputUsers.add(new InputUserOrPeerSelf());
             for(User user : apiBridge.usersGetUsers(inputUsers)) {
                 System.out.println(user);
+                UserFull userFull = apiBridge.usersGetFullUser(user);
+                System.out.println("Real name : " + userFull.getRealFirstName() + " " + userFull.getRealLastName());
+                System.out.println("Contact name : " + userFull.getUser().getId() + " vs " + user.getId());
+                System.out.println("MyLink : " + userFull.getMyLink());
+                System.out.println("ForegnLink : " + userFull.getForeignLink());
+                System.out.println("Blcoked : " + userFull.isBlocked());
             }
+
 
             MessagesMessages messagesMessages = apiBridge.messagesSearch("слово", 0, 0, 200);
 
