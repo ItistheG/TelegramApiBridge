@@ -73,6 +73,10 @@ public class UpdatesDifferenceOrSlice implements UpdatesAbsDifference {
         return newMessages;
     }
 
+    public ArrayList<Update> getOtherUpdates() {
+        return otherUpdates;
+    }
+
     public HashSet<User> getUsers() {
         return users;
     }
