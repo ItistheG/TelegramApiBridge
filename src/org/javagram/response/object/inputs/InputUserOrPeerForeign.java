@@ -8,7 +8,7 @@ import org.telegram.api.TLInputUserForeign;
 /**
  * Created by HerrSergio on 22.04.2016.
  */
-public class InputUserOrPeerForeign implements InputUser, InputPeer {
+public class InputUserOrPeerForeign implements InputUserOrPeer {
 
     private int id;
     private long accessHash;

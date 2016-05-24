@@ -6,13 +6,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /**
- * Created by HerrSergio on 27.04.2016.
+ * Created by HerrSergio on 22.05.2016.
  */
-public class UpdateDeleteMessages implements Update {
+public class UpdateRestoreMessages implements Update {
     private ArrayList<Integer> messages;
     private int pts;
 
-    public UpdateDeleteMessages(Collection<Integer> messages, int pts) {
+    public UpdateRestoreMessages(Collection<Integer> messages, int pts) {
         this.pts = pts;
         this.messages = new ArrayList<>(messages);
     }

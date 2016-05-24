@@ -23,14 +23,19 @@ import org.telegram.api.messages.*;
 import org.telegram.api.requests.*;
 import org.telegram.api.updates.TLAbsDifference;
 import org.telegram.api.updates.TLState;
+import org.telegram.api.upload.TLFile;
 import org.telegram.tl.TLBoolTrue;
 import org.telegram.tl.TLIntVector;
 import org.telegram.tl.TLStringVector;
 import org.telegram.tl.TLVector;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
+import static org.javagram.response.Helper.*;
 
 /**
  * Created by Danya on 04.09.2015.
@@ -356,7 +361,7 @@ public class TelegramApiBridge implements Closeable
         if(tlAbsInputPeer == null)
             return new MessagesMessages();
         TLRequestMessagesSearch tlRequestMessagesSearch = new TLRequestMessagesSearch(tlAbsInputPeer, q,
-                new TLInputMessagesFilterEmpty(), Message.dateToInt(minDate), Message.dateToInt(maxDate), offset, maxId, limit);
+                new TLInputMessagesFilterEmpty(), dateToInt(minDate), dateToInt(maxDate), offset, maxId, limit);
         TLAbsMessages tlAbsMessages = api.doRpcCall(tlRequestMessagesSearch);
         return new MessagesMessages(tlAbsMessages, null);
 
@@ -416,7 +421,7 @@ public class TelegramApiBridge implements Closeable
     }
 
     public UpdatesAbsDifference updatesGetDifference(int pts, Date date, int qts) throws IOException {
-        TLRequestUpdatesGetDifference tlRequestUpdatesGetDifference = new TLRequestUpdatesGetDifference(pts, Message.dateToInt(date), qts);
+        TLRequestUpdatesGetDifference tlRequestUpdatesGetDifference = new TLRequestUpdatesGetDifference(pts, dateToInt(date), qts);
         TLAbsDifference tlAbsDifference = api.doRpcCall(tlRequestUpdatesGetDifference);
         return UpdatesAbsDifference.create(tlAbsDifference/*, null*/);
     }
@@ -511,6 +516,9 @@ public class TelegramApiBridge implements Closeable
 
             @Override
             public void onUpdate(TLAbsUpdates updates) {
+
+                handleUpdate(updates);
+
                 if (updates instanceof TLUpdateShortMessage)
                 {
                     TLUpdateShortMessage shortMessage = (TLUpdateShortMessage) updates;
@@ -526,5 +534,68 @@ public class TelegramApiBridge implements Closeable
             }
         });
         StaticContainer.setTelegramApi(api);
+    }
+
+    private ArrayDeque<TLAbsUpdates> tlAbsUpdates = new ArrayDeque<>();
+
+    private void handleUpdate(TLAbsUpdates updates) {
+        synchronized (tlAbsUpdates) {
+            tlAbsUpdates.addLast(updates);
+        }
+    }
+
+    //TODO Do it!
+    public void processUpdates() {
+        ArrayList<TLAbsUpdates> updates = new ArrayList<>();
+        synchronized (tlAbsUpdates) {
+            updates.addAll(tlAbsUpdates);
+            tlAbsUpdates.clear();
+        }
+
+    }
+
+    public BufferedImage getPhoto(TLAbsUserProfilePhoto photo, boolean small) throws IOException {
+        return getPhotoAsImage(getPhotoAsBytes(api, photo, small));
+    }
+
+    @Deprecated
+    public static byte[] getPhotoAsBytes(TelegramApi api, TLAbsUserProfilePhoto photo, boolean small) throws IOException {
+        //TelegramApi api = StaticContainer.getTelegramApi();
+
+        if (!(photo instanceof TLUserProfilePhoto)) {
+            return null;
+        }
+        TLUserProfilePhoto profilePhoto = (TLUserProfilePhoto) photo;
+        TLAbsFileLocation location = small ? profilePhoto.getPhotoSmall() : profilePhoto.getPhotoBig();
+        if (!(location instanceof TLFileLocation)) {
+            return null;
+        }
+
+        TLFileLocation fileLocation = (TLFileLocation) location;
+        int dcId = api.getState().getPrimaryDc(); //fileLocation.getDcId();
+
+        TLInputFileLocation inputLocation = new TLInputFileLocation(
+                fileLocation.getVolumeId(),
+                fileLocation.getLocalId(),
+                fileLocation.getSecret()
+        );
+
+        TLFile res;
+        try {
+            res = api.doGetFile(dcId, inputLocation, 0, 1024 * 1024 * 1024);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        return res.getBytes().cleanData();
+    }
+
+    @Deprecated
+    public static BufferedImage getPhotoAsImage(byte[] bytes) throws IOException {
+        if (bytes == null)
+            return null;
+        try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes)) {
+            return ImageIO.read(byteArrayInputStream);
+        }
     }
 }

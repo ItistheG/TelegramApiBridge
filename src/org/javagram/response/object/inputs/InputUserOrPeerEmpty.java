@@ -8,7 +8,7 @@ import org.telegram.api.TLInputUserEmpty;
 /**
  * Created by HerrSergio on 22.04.2016.
  */
-public class InputUserOrPeerEmpty implements InputUser, InputPeer {
+public class InputUserOrPeerEmpty implements InputUserOrPeer {
 
     public InputUserOrPeerEmpty() {
 

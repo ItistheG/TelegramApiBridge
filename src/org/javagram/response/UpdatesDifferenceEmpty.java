@@ -4,7 +4,7 @@ import org.javagram.response.object.Message;
 import org.telegram.api.updates.TLDifferenceEmpty;
 
 import java.util.Date;
-
+import static org.javagram.response.Helper.*;
 /**
  * Created by HerrSergio on 27.04.2016.
  */
@@ -15,7 +15,7 @@ public class UpdatesDifferenceEmpty implements UpdatesAbsDifference {
 
     public UpdatesDifferenceEmpty(TLDifferenceEmpty tlDifferenceEmpty) {
         this.seq = tlDifferenceEmpty.getSeq();
-        this.date = Message.intToDate(tlDifferenceEmpty.getDate());
+        this.date = intToDate(tlDifferenceEmpty.getDate());
     }
 
     public int getSeq() {

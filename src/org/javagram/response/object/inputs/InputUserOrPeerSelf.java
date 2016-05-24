@@ -8,7 +8,7 @@ import org.telegram.api.TLInputUserSelf;
 /**
  * Created by HerrSergio on 22.04.2016.
  */
-public class InputUserOrPeerSelf implements InputUser, InputPeer {
+public class InputUserOrPeerSelf implements InputUserOrPeer {
 
     public InputUserOrPeerSelf() {
 

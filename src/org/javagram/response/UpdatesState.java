@@ -4,6 +4,7 @@ import org.javagram.response.object.MessagesMessage;
 import org.telegram.api.updates.TLState;
 
 import java.util.Date;
+import static org.javagram.response.Helper.*;
 
 /**
  * Created by HerrSergio on 23.04.2016.
@@ -19,7 +20,7 @@ public class UpdatesState {
     public  UpdatesState(TLState tlState) {
         this.pts = tlState.getPts();
         this.qts = tlState.getQts();
-        this.date = MessagesMessage.intToDate(tlState.getDate());
+        this.date = intToDate(tlState.getDate());
         this.seq = tlState.getSeq();
         this.unreadCount = tlState.getUnreadCount();
     }

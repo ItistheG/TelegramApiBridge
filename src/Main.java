@@ -33,8 +33,8 @@ public class Main
         ) {
 
             String phoneNumber =
-                    "79173314167";
-            // "79876497774";
+               //     "79173314167";
+             "79876497774";
 
             //Sending validation code
             try {
@@ -83,13 +83,13 @@ public class Main
 
                 users.add(user);
 
-                if(messagesDialog.getUnreadCount() > 0) {
+               /* if(messagesDialog.getUnreadCount() > 0) {
                     apiBridge.messagesReadHistory(user, messagesDialog.getTopMessage().getId());
                 }
 
                 List<MessagesMessage> messagesMessages = apiBridge.messagesGetHistory(user, 0, 0, Integer.MAX_VALUE).getMessages();
                 for(MessagesMessage message : messagesMessages)
-                    System.out.println(message.getMessage());
+                    System.out.println(message.getMessage());*/
 
                 /*if(messagesMessages.size() > 0) {
                     MessagesMessage messagesMessage = messagesMessages.get(0);
@@ -121,6 +121,7 @@ public class Main
 
 
             apiBridge.close();
+            System.exit(0);
 
             // dialogs.addAll(apiBridge.messagesGetDialogs(2, Integer.MAX_VALUE, 2));
 

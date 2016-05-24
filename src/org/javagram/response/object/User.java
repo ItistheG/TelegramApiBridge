@@ -3,10 +3,8 @@ package org.javagram.response.object;
 import org.javagram.TelegramApiBridge;
 import org.javagram.core.StaticContainer;
 import org.telegram.api.*;
-import org.telegram.api.engine.TelegramApi;
-import org.telegram.api.upload.TLFile;
-import org.telegram.tl.TLBytes;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 /**
@@ -94,38 +92,23 @@ public abstract class User implements InputUser, InputPeer
         return phone;
     }
 
-    public byte[] getPhoto(boolean small) throws IOException
-    {
-        TelegramApi api = StaticContainer.getTelegramApi();
-
-        if(!(photo instanceof TLUserProfilePhoto)) {
-            return null;
-        }
-        TLUserProfilePhoto profilePhoto = (TLUserProfilePhoto) photo;
-        TLAbsFileLocation location = small ? profilePhoto.getPhotoSmall() : profilePhoto.getPhotoBig();
-        if(!(location instanceof TLFileLocation)) {
-            return null;
-        }
-
-        TLFileLocation fileLocation = (TLFileLocation) location;
-        int dcId = api.getState().getPrimaryDc(); //fileLocation.getDcId();
-
-        TLInputFileLocation inputLocation = new TLInputFileLocation(
-            fileLocation.getVolumeId(),
-            fileLocation.getLocalId(),
-            fileLocation.getSecret()
-        );
-
-        TLFile res;
+    public BufferedImage getPhoto(TelegramApiBridge telegramApiBridge, boolean small) {
         try {
-            res = api.doGetFile(dcId, inputLocation, 0, 1024 * 1024 * 1024);
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
+            return telegramApiBridge.getPhoto(photo, small);
+        } catch (IOException e) {
+            e.printStackTrace();
             return null;
         }
-        return res.getBytes().cleanData();
+    }
+
+    @Deprecated
+    public byte[] getPhoto(boolean small) {
+        try {
+            return TelegramApiBridge.getPhotoAsBytes(StaticContainer.getTelegramApi(), photo, small);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public String toString()

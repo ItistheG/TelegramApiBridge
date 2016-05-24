@@ -10,9 +10,9 @@ import java.util.Collection;
  */
 public class UpdateReadMessage implements Update {
     private int pts;
-    private ArrayList<MessagesMessage> messages;
+    private ArrayList<Integer> messages;
 
-    public UpdateReadMessage(Collection<? extends MessagesMessage> messages, int pts) {
+    public UpdateReadMessage(Collection<Integer> messages, int pts) {
         this.pts = pts;
         this.messages = new ArrayList<>(messages);
     }
@@ -21,7 +21,7 @@ public class UpdateReadMessage implements Update {
         return pts;
     }
 
-    public ArrayList<MessagesMessage> getMessages() {
+    public ArrayList<Integer> getMessages() {
         return messages;
     }
 }

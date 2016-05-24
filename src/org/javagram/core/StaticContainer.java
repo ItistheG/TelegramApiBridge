@@ -5,6 +5,7 @@ import org.telegram.api.engine.TelegramApi;
 /**
  * Created by Danya on 28.02.2016.
  */
+@Deprecated
 public class StaticContainer
 {
     private static TelegramApi telegramApi;

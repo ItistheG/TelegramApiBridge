@@ -8,7 +8,7 @@ import org.telegram.api.TLInputUserContact;
 /**
  * Created by HerrSergio on 22.04.2016.
  */
-public class InputUserOrPeerContact implements InputUser, InputPeer {
+public class InputUserOrPeerContact implements InputUserOrPeer {
 
     private int id;
 

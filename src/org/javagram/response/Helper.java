@@ -11,7 +11,7 @@ import java.util.*;
 /**
  * Created by HerrSergio on 27.04.2016.
  */
-class Helper {
+public class Helper {
 
     private Helper() {
 
@@ -67,44 +67,78 @@ class Helper {
                     continue;
                 MessagesMessage message = messagesMessages.get(tlUpdateNewMessage.getMessage().getId());
                 updates.add(new UpdateNewMessage(message, tlUpdateNewMessage.getPts()));
+            } else if(tlAbsUpdate instanceof TLUpdateMessageID) {
+                TLUpdateMessageID tlUpdateMessageID = (TLUpdateMessageID)tlAbsUpdate;
+                if(messagesMessages.containsKey(tlUpdateMessageID.getId()))
+                    updates.add(new UpdateMessageID(messagesMessages.get(tlUpdateMessageID.getId()), tlUpdateMessageID.getRandomId()));
             } else if(tlAbsUpdate instanceof TLUpdateReadMessages) {
                 TLUpdateReadMessages tlUpdateReadMessages = (TLUpdateReadMessages)tlAbsUpdate;
-                ArrayList<MessagesMessage> messages = new ArrayList<>();
+               /* ArrayList<MessagesMessage> messages = new ArrayList<>();
                 for(Integer id : tlUpdateReadMessages.getMessages()) {
                     if(!messagesMessages.containsKey(id))
                         continue;
                     MessagesMessage message = messagesMessages.get(id);
                     messages.add(message);
+                }*/
+                ArrayList<Integer> messages = new ArrayList<>();
+                for(Integer id : tlUpdateReadMessages.getMessages()) {
+                    messages.add(id);
                 }
                 if(messages.size() > 0) {
                     updates.add(new UpdateReadMessage(messages, ((TLUpdateReadMessages) tlAbsUpdate).getPts()));
                 }
             } else if(tlAbsUpdate instanceof TLUpdateDeleteMessages) {
                 TLUpdateDeleteMessages tlUpdateDeleteMessages = (TLUpdateDeleteMessages)tlAbsUpdate;
-                ArrayList<MessagesMessage> messages = new ArrayList<>();
+                /*ArrayList<MessagesMessage> messages = new ArrayList<>();
                 for(Integer id : tlUpdateDeleteMessages.getMessages()) {
                     if(!messagesMessages.containsKey(id))
                         continue;
                     MessagesMessage message = messagesMessages.get(id);
                     messages.add(message);
+                }*/
+                ArrayList<Integer> messages = new ArrayList<>();
+                for(Integer id : tlUpdateDeleteMessages.getMessages()) {
+                    messages.add(id);
                 }
                 if(messages.size() > 0) {
                     updates.add(new UpdateDeleteMessages(messages, tlUpdateDeleteMessages.getPts()));
+                }
+            } else if(tlAbsUpdate instanceof TLUpdateRestoreMessages) {
+                TLUpdateRestoreMessages tlUpdateRestoreMessages = (TLUpdateRestoreMessages)tlAbsUpdate;
+                /*ArrayList<MessagesMessage> messages = new ArrayList<>();
+                for(Integer id : tlUpdateRestoreMessages.getMessages()) {
+                    if(!messagesMessages.containsKey(id))
+                        continue;
+                    MessagesMessage message = messagesMessages.get(id);
+                    messages.add(message);
+                }*/
+                ArrayList<Integer> messages = new ArrayList<>();
+                for(Integer id : tlUpdateRestoreMessages.getMessages()) {
+                    messages.add(id);
+                }
+                if(messages.size() > 0) {
+                    updates.add(new UpdateRestoreMessages(messages, tlUpdateRestoreMessages.getPts()));
                 }
             } else if(tlAbsUpdate instanceof TLUpdateUserName) {
                 TLUpdateUserName tlUpdateUserName = (TLUpdateUserName)tlAbsUpdate;
                 User user = users.get(tlUpdateUserName.getUserId());
                 users2.add(user);
                 updates.add(new UpdateUserName(user, tlUpdateUserName.getFirstName(), tlUpdateUserName.getLastName()));
+            } else if(tlAbsUpdate instanceof TLUpdateUserPhoto) {
+                TLUpdateUserPhoto tlUpdateUserPhoto = (TLUpdateUserPhoto)tlAbsUpdate;
+                User user = users.get(tlUpdateUserPhoto.getUserId());
+                users2.add(user);
+                updates.add(new UpdateUserPhoto(user,  intToDate(tlUpdateUserPhoto.getDate()), tlUpdateUserPhoto.getPhoto(), tlUpdateUserPhoto.getPrevious()));
             } else if(tlAbsUpdate instanceof TLUpdateUserStatus) {
                 TLUpdateUserStatus tlUpdateUserStatus = (TLUpdateUserStatus)tlAbsUpdate;
                 User user = users.get(tlUpdateUserStatus.getUserId());
                 users2.add(user);
                 updates.add(new UpdateUserStatus(user, getExpires(tlUpdateUserStatus.getStatus())));
-            } else if(tlAbsUpdate instanceof TLUpdateMessageID) {
-                TLUpdateMessageID tlUpdateMessageID = (TLUpdateMessageID)tlAbsUpdate;
-                if(messagesMessages.containsKey(tlUpdateMessageID.getId()))
-                    updates.add(new UpdateMessageID(messagesMessages.get(tlUpdateMessageID.getId()), tlUpdateMessageID.getRandomId()));
+            } else if(tlAbsUpdate instanceof TLUpdateUserTyping) {
+                TLUpdateUserTyping tlUpdateUserTyping = (TLUpdateUserTyping)tlAbsUpdate;
+                User user = users.get(tlUpdateUserTyping.getUserId());
+                users2.add(user);
+                updates.add(new UpdateUserTyping(user));
             } else {
 
             }
@@ -115,9 +149,9 @@ class Helper {
 
     static Date getExpires(TLAbsUserStatus tlAbsUserStatus) {
         if(tlAbsUserStatus instanceof TLUserStatusOnline) {
-            return Message.intToDate(((TLUserStatusOnline) tlAbsUserStatus).getExpires());
+            return intToDate(((TLUserStatusOnline) tlAbsUserStatus).getExpires());
         } else if(tlAbsUserStatus instanceof TLUserStatusOffline) {
-            return Message.intToDate(((TLUserStatusOffline) tlAbsUserStatus).getWasOnline());
+            return intToDate(((TLUserStatusOffline) tlAbsUserStatus).getWasOnline());
         } else if(tlAbsUserStatus instanceof TLUserStatusEmpty) {
             return null;
         } else {
@@ -137,6 +171,19 @@ class Helper {
         for(User user : collection)
             users.put(user.getId(), user);
         return users;
+    }
+
+    private static final long DATE_MULTIPLIER = 1000;
+
+    public static int dateToInt(Date date) {
+        if(date == null)
+            return 0;
+        else
+            return (int)(date.getTime() / DATE_MULTIPLIER);
+    }
+
+    public static Date intToDate(int date) {
+        return new Date(date * DATE_MULTIPLIER);
     }
 
 }

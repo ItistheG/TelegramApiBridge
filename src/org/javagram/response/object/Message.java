@@ -1,6 +1,7 @@
 package org.javagram.response.object;
 
 
+import com.sun.deploy.ref.Helpers;
 import org.javagram.response.ExpectedInconsistentDataException;
 import org.javagram.response.InconsistentDataException;
 import org.telegram.api.*;
@@ -8,6 +9,7 @@ import org.telegram.api.TLAbsMessage;
 import org.telegram.api.TLMessage;
 import org.telegram.api.TLMessageEmpty;
 import org.telegram.api.messages.*;
+import static org.javagram.response.Helper.*;
 
 import java.util.Date;
 
@@ -23,8 +25,6 @@ public class Message
     private boolean unread;
     private Date date;
     private String message;
-
-    private static final long DATE_MULTIPLIER = 1000;
 
     private Integer fwdFromId;
     private Date fwdData;
@@ -140,15 +140,5 @@ public class Message
         return toPeerUserId;
     }
 
-    public static int dateToInt(Date date) {
-        if(date == null)
-            return 0;
-        else
-            return (int)(date.getTime() / DATE_MULTIPLIER);
-    }
-
-    public static Date intToDate(int date) {
-        return new Date(date * DATE_MULTIPLIER);
-    }
 
 }
