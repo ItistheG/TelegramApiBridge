@@ -266,25 +266,25 @@ public class TelegramApiBridge implements Closeable
      * @param randomId
      * @throws IOException
      */
-    public MessagesSentMessage messagesSendMessage(int userId, String message, long randomId) throws IOException
+    public MessagesSentMessage messagesSendMessage(InputPeer inputPeer, String message, long randomId) throws IOException
     {
-        TLInputPeerContact peerContact = new TLInputPeerContact(userId);
-        TLRequestMessagesSendMessage request = new TLRequestMessagesSendMessage(peerContact, message, randomId);
+        TLAbsInputPeer peer = inputPeer.createTLInputPeer();
+        TLRequestMessagesSendMessage request = new TLRequestMessagesSendMessage(peer, message, randomId);
         TLAbsSentMessage sentMessage = /*(TLSentMessage) */api.doRpcCall(request);
         return new MessagesSentMessage(sentMessage);
     }
 
     /**
      *
-     * @param userId
+     * @param inputPeer
      * @param isTyping
      * @return
      * @throws IOException
      */
-    public boolean messagesSetTyping(int userId, boolean isTyping) throws IOException
+    public boolean messagesSetTyping(InputPeer inputPeer, boolean isTyping) throws IOException
     {
-        TLInputPeerContact peerContact = new TLInputPeerContact(userId);//TODO:Смущает. А не контакты?
-        TLRequestMessagesSetTyping request = new TLRequestMessagesSetTyping(peerContact, isTyping);
+        TLAbsInputPeer peer = inputPeer.createTLInputPeer();
+        TLRequestMessagesSetTyping request = new TLRequestMessagesSetTyping(peer, isTyping);
         return api.doRpcCall(request) instanceof TLBoolTrue;
     }
 

@@ -147,15 +147,15 @@ public class Main
 
             //System.err.println("Delete contact: " + apiBridge.contactsDeleteContact(173382350));
 
-            int userId = 116023976;
+          //  int userId = 116023976;
 
-            MessagesSentMessage sentMessage = apiBridge.messagesSendMessage(userId, "Tesxt message", (long) (1000000000L * Math.random()));
+         /*   MessagesSentMessage sentMessage = apiBridge.messagesSendMessage(userId, "Tesxt message", (long) (1000000000L * Math.random()));
             System.err.println("Sent message: id=" + sentMessage.getId() + ", date=" +
-                    sentMessage.getDate() + ", pts=" + sentMessage.getPts() + ", seq=" + sentMessage.getSeq());
+                    sentMessage.getDate() + ", pts=" + sentMessage.getPts() + ", seq=" + sentMessage.getSeq());*/
 
             apiBridge.setIncomingMessageHandler(new IncMessageHandler());
 
-            System.err.println("Typing: " + apiBridge.messagesSetTyping(userId, true));
+           // System.err.println("Typing: " + apiBridge.messagesSetTyping(userId, true));
 
 //        System.err.println("Update status to offline: " + apiBridge.accountUpdateStatus(true));
 //        System.err.println("Update profile: " + apiBridge.accountUpdateProfile("Даниил", "Пилипенко").toString());
