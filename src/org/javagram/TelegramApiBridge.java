@@ -6,14 +6,18 @@ import org.javagram.handlers.IncomingMessageHandler;
 import org.javagram.response.*;
 import org.javagram.response.object.*;
 import org.javagram.response.MessagesMessages;
+import org.javagram.response.object.inputs.InputContact;
 import org.javagram.response.object.inputs.InputUserOrPeerEmpty;
 import org.javagram.response.MessagesAffectedHistory;
+import org.javagram.response.object.updates.Update;
+import org.javagram.response.object.updates.UpdateNewMessage;
 import org.telegram.api.*;
 import org.telegram.api.TLAbsMessage;
 import org.telegram.api.auth.TLAuthorization;
 import org.telegram.api.auth.TLCheckedPhone;
 import org.telegram.api.auth.TLSentCode;
 import org.telegram.api.contacts.TLContacts;
+import org.telegram.api.contacts.TLImportedContacts;
 import org.telegram.api.contacts.TLLink;
 import org.telegram.api.engine.ApiCallback;
 import org.telegram.api.engine.AppInfo;
@@ -195,6 +199,22 @@ public class TelegramApiBridge implements Closeable
         return api.doRpcCall(request) instanceof TLBoolTrue;
     }
 
+
+    public Integer contactsImportContact(InputContact inputContact) throws IOException {
+        boolean replace = false;
+        TLVector<TLInputContact> inputContacts = new TLVector<>();
+        inputContacts.add(inputContact.createTLInputContact());
+        TLRequestContactsImportContacts tlRequestContactsImportContacts =
+                new TLRequestContactsImportContacts(inputContacts, replace);
+        TLImportedContacts tlImportedContacts = api.doRpcCall(tlRequestContactsImportContacts);
+        if(tlImportedContacts.getImported().size() == 0)
+            return null;
+        TLImportedContact tlImportedContact = tlImportedContacts.getImported().get(0);
+        if(tlImportedContact.getClientId() == inputContact.getClientId())
+            return tlImportedContact.getUserId();
+        else
+            return null;
+    }
     /**
      *
      * @param userId
@@ -545,13 +565,91 @@ public class TelegramApiBridge implements Closeable
     }
 
     //TODO Do it!
-    public void processUpdates() {
+    public UpdatesAsyncDifference processAsyncUpdates(UpdatesState state, HashMap<Integer, User> users2, int userSelfId) {
         ArrayList<TLAbsUpdates> updates = new ArrayList<>();
         synchronized (tlAbsUpdates) {
             updates.addAll(tlAbsUpdates);
             tlAbsUpdates.clear();
         }
 
+        ArrayList<Update> result = new ArrayList<>();
+        ArrayList<Message> messages = new ArrayList<>();
+        HashSet<User> users = new HashSet<>();
+
+        if(users2 == null)
+            users2 = new HashMap<>();
+
+        int seq = state.getSeq();
+        int pts = state.getPts();
+        Date date = state.getDate();
+        int qts = state.getQts();
+        int unreadCount = state.getUnreadCount();
+        boolean brokenAsync = false;
+
+        for(TLAbsUpdates tlAbsUpdates :  updates) {
+            if(tlAbsUpdates instanceof TLUpdateShort) {
+                TLUpdateShort tlUpdateShort = (TLUpdateShort)tlAbsUpdates;
+                Date updateDate = Helper.intToDate(tlUpdateShort.getDate());
+                if(updateDate.before(date)) {
+                    brokenAsync = true;
+                    continue;
+                }
+                date = updateDate;
+                pts = Math.max(pts, Helper.acceptTLUpdates(result, Arrays.asList(tlUpdateShort.getUpdate()), messages, users2, users));
+            } else if(tlAbsUpdates instanceof TLUpdateShortMessage) {
+                TLUpdateShortMessage tlUpdateShortMessage = (TLUpdateShortMessage)tlAbsUpdates;
+                Date updateDate = Helper.intToDate(tlUpdateShortMessage.getDate());
+                if(updateDate.before(date) || seq + 1 != tlUpdateShortMessage.getSeq() || pts >= tlUpdateShortMessage.getPts()) {
+                    brokenAsync = true;
+                    continue;
+                }
+                date = updateDate;
+                pts = tlUpdateShortMessage.getPts();
+                seq = tlUpdateShortMessage.getSeq();
+                Message message = new Message(tlUpdateShortMessage, userSelfId);
+                messages.add(message);
+                result.add(new UpdateNewMessage(message, pts));
+            } else if(tlAbsUpdates instanceof TLUpdateShortChatMessage) {
+                TLUpdateShortChatMessage tlUpdateShortChatMessage = (TLUpdateShortChatMessage)tlAbsUpdates;
+                Date updateDate = Helper.intToDate(tlUpdateShortChatMessage.getDate());
+                if(updateDate.before(date) || seq + 1 != tlUpdateShortChatMessage.getSeq() || pts >= tlUpdateShortChatMessage.getPts()) {
+                    brokenAsync = true;
+                    continue;
+                }
+                date = updateDate;
+                pts = tlUpdateShortChatMessage.getPts();
+                seq = tlUpdateShortChatMessage.getSeq();
+            } else if(tlAbsUpdates instanceof TLUpdatesCombined) {
+                TLUpdatesCombined tlUpdatesCombined = (TLUpdatesCombined)tlAbsUpdates;
+                Date updateDate = Helper.intToDate(tlUpdatesCombined.getDate());
+                if(updateDate.before(date) || seq + 1 != tlUpdatesCombined.getSeqStart()) {
+                    brokenAsync = true;
+                    continue;
+                }
+                date = updateDate;
+                pts = Math.max(pts, Helper.acceptTLUpdates(result, tlUpdatesCombined.getUpdates(), messages, users2, users));
+                seq = tlUpdatesCombined.getSeq();
+            } else if(tlAbsUpdates instanceof TLUpdates) {
+                TLUpdates tlUpdates = (TLUpdates)tlAbsUpdates;
+                Date updateDate = Helper.intToDate(tlUpdates.getDate());
+                if(updateDate.before(date) || seq + 1 != tlUpdates.getSeq()) {
+                    brokenAsync = true;
+                    continue;
+                }
+                date = updateDate;
+                pts = Math.max(pts, Helper.acceptTLUpdates(result, tlUpdates.getUpdates(), messages, users2, users));
+                seq = tlUpdates.getSeq();
+            } else {
+                brokenAsync = true;
+                continue;
+            }
+        }
+
+        UpdatesState updatesState = null;
+        if(!brokenAsync)
+            updatesState = new UpdatesState(pts, qts, date, seq, unreadCount);
+
+        return new UpdatesAsyncDifference(updatesState, messages, result, users);
     }
 
     public BufferedImage getPhoto(TLAbsUserProfilePhoto photo, boolean small) throws IOException {

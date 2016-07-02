@@ -6,20 +6,20 @@ import org.javagram.response.object.User;
  * Created by HerrSergio on 27.04.2016.
  */
 public class UpdateUserName implements Update {
-    private User user;
+    private int userId;
     private String firstName;
     private String lastName;
    // private String username;
 
-    public UpdateUserName(User user, String firstName, String lastName/*, String username*/) {
-        this.user = user;
+    public UpdateUserName(int userId, String firstName, String lastName/*, String username*/) {
+        this.userId = userId;
         this.firstName = firstName;
         this.lastName = lastName;
         //this.username = username;
     }
 
-    public User getUser() {
-        return user;
+    public int getUser() {
+        return userId;
     }
 
     public String getFirstName() {

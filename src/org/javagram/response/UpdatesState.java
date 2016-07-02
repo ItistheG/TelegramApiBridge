@@ -25,6 +25,14 @@ public class UpdatesState {
         this.unreadCount = tlState.getUnreadCount();
     }
 
+    public UpdatesState(int pts, int qts, Date date, int seq, int unreadCount) {
+        this.pts = pts;
+        this.qts = qts;
+        this.date = date;
+        this.seq = seq;
+        this.unreadCount = unreadCount;
+    }
+
     public int getPts() {
         return pts;
     }

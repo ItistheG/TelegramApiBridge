@@ -9,16 +9,16 @@ import java.util.Date;
  * Created by HerrSergio on 27.04.2016.
  */
 public class UpdateUserStatus implements Update {
-    private User user;
+    private int userId;
     private Date expires;
 
-    public UpdateUserStatus(User user, Date expires) {
-        this.user = user;
+    public UpdateUserStatus(int userId, Date expires) {
+        this.userId = userId;
         this.expires = expires;
     }
 
-    public User getUser() {
-        return user;
+    public int getUser() {
+        return userId;
     }
 
     public Date getExpires() {

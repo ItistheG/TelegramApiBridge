@@ -3,6 +3,7 @@ import org.javagram.TelegramApiBridge;
 import org.javagram.response.*;
 import org.javagram.response.object.*;
 import org.javagram.response.MessagesMessages;
+import org.javagram.response.object.inputs.InputContact;
 import org.javagram.response.object.inputs.InputUserOrPeerSelf;
 
 import java.io.BufferedReader;
@@ -47,16 +48,18 @@ public class Main
             System.err.println("Please, enter SMS code: ");
             String smsCode = bReader.readLine().trim();
 
+            User me;
+
             //Checking phone number
             AuthCheckedPhone checkedPhone = apiBridge.authCheckPhone(phoneNumber);
             if (checkedPhone.isRegistered()) {
                 //Authorization
                 AuthAuthorization auth = apiBridge.authSignIn(smsCode);
-                User user = auth.getUser();
-                System.err.println("You've signed in; name: " + user.toString());
+                me = auth.getUser();
+                System.err.println("You've signed in; name: " + me.toString());
 
-                savePhoto(user.getPhoto(true), photosPath + "/self-small.png");
-                savePhoto(user.getPhoto(false), photosPath + "/self-big.png");
+                savePhoto(me.getPhoto(true), photosPath + "/self-small.png");
+                savePhoto(me.getPhoto(false), photosPath + "/self-big.png");
             } else {
                 //Registration
                 System.err.println("Please, type the first name:");
@@ -64,8 +67,19 @@ public class Main
                 System.err.println("Please, type the last name:");
                 String lastName = bReader.readLine().trim();
                 AuthAuthorization auth = apiBridge.authSignUp(smsCode, firstName, lastName);
-                System.err.println("You've signed up; name: " + auth.getUser().toString());
+                me = auth.getUser();
+                System.err.println("You've signed up; name: " + me.toString());
             }
+
+            apiBridge.contactsImportContact(new InputContact(0, "+79173314167", "Denis", "Gaevoy"));
+
+            UpdatesState s = apiBridge.updatesGetState();
+            while(s != null) {
+                Thread.sleep(10000L);
+                UpdatesAsyncDifference dif = apiBridge.processAsyncUpdates(s, new HashMap<>(), me.getId());
+                s = dif.getState();
+            }
+
 
             apiBridge.setIncomingMessageHandler(new IncMessageHandler());
 

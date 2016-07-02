@@ -10,16 +10,16 @@ import java.util.Date;
  */
 public class UpdateUserTyping implements Update {
 
-    private User user;
+    private int userId;
     private Date expires;
 
-    public UpdateUserTyping(User user) {
-        this.user = user;
+    public UpdateUserTyping(int userId) {
+        this.userId = userId;
         this.expires = new Date(System.currentTimeMillis() + 6000);
     }
 
-    public User getUser() {
-        return user;
+    public int getUser() {
+        return userId;
     }
 
     public Date getExpires() {

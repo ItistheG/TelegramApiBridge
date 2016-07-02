@@ -17,7 +17,7 @@ public class Helper {
 
     }
 
-    static void acceptTLAbsMessages(List<MessagesMessage> messagesMessages,
+    public static void acceptTLAbsMessages(List<? super MessagesMessage> messagesMessages,
                                     List<TLAbsUser> tlAbsUserList,
                                     List<TLAbsMessage> tlAbsMessageList,
                                     Map<Integer, User> users,
@@ -55,10 +55,9 @@ public class Helper {
         return users;
     }
 
-    static void acceptTLUpdates(List<? super Update> updates, List<TLAbsUpdate> tlAbsUpdates, Map<Integer, ? extends MessagesMessage> messagesMessages,
-                                             Map<Integer, ? extends User> users, Set<? super User> users2) {
 
-      //  ArrayList<Update> updates = new ArrayList<>();
+    static void acceptTLOtherUpdates(List<? super Update> updates, List<TLAbsUpdate> tlAbsUpdates, Map<Integer, ? extends MessagesMessage> messagesMessages,
+                                Map<Integer, ? extends User> users, Set<? super User> users2) {
 
         for(TLAbsUpdate tlAbsUpdate : tlAbsUpdates) {
             if(tlAbsUpdate instanceof TLUpdateNewMessage) {
@@ -70,81 +69,99 @@ public class Helper {
             } else if(tlAbsUpdate instanceof TLUpdateMessageID) {
                 TLUpdateMessageID tlUpdateMessageID = (TLUpdateMessageID)tlAbsUpdate;
                 if(messagesMessages.containsKey(tlUpdateMessageID.getId()))
-                    updates.add(new UpdateMessageID(messagesMessages.get(tlUpdateMessageID.getId()), tlUpdateMessageID.getRandomId()));
-            } else if(tlAbsUpdate instanceof TLUpdateReadMessages) {
-                TLUpdateReadMessages tlUpdateReadMessages = (TLUpdateReadMessages)tlAbsUpdate;
-               /* ArrayList<MessagesMessage> messages = new ArrayList<>();
-                for(Integer id : tlUpdateReadMessages.getMessages()) {
-                    if(!messagesMessages.containsKey(id))
-                        continue;
-                    MessagesMessage message = messagesMessages.get(id);
-                    messages.add(message);
-                }*/
-                ArrayList<Integer> messages = new ArrayList<>();
-                for(Integer id : tlUpdateReadMessages.getMessages()) {
-                    messages.add(id);
-                }
-                if(messages.size() > 0) {
-                    updates.add(new UpdateReadMessage(messages, ((TLUpdateReadMessages) tlAbsUpdate).getPts()));
-                }
-            } else if(tlAbsUpdate instanceof TLUpdateDeleteMessages) {
-                TLUpdateDeleteMessages tlUpdateDeleteMessages = (TLUpdateDeleteMessages)tlAbsUpdate;
-                /*ArrayList<MessagesMessage> messages = new ArrayList<>();
-                for(Integer id : tlUpdateDeleteMessages.getMessages()) {
-                    if(!messagesMessages.containsKey(id))
-                        continue;
-                    MessagesMessage message = messagesMessages.get(id);
-                    messages.add(message);
-                }*/
-                ArrayList<Integer> messages = new ArrayList<>();
-                for(Integer id : tlUpdateDeleteMessages.getMessages()) {
-                    messages.add(id);
-                }
-                if(messages.size() > 0) {
-                    updates.add(new UpdateDeleteMessages(messages, tlUpdateDeleteMessages.getPts()));
-                }
-            } else if(tlAbsUpdate instanceof TLUpdateRestoreMessages) {
-                TLUpdateRestoreMessages tlUpdateRestoreMessages = (TLUpdateRestoreMessages)tlAbsUpdate;
-                /*ArrayList<MessagesMessage> messages = new ArrayList<>();
-                for(Integer id : tlUpdateRestoreMessages.getMessages()) {
-                    if(!messagesMessages.containsKey(id))
-                        continue;
-                    MessagesMessage message = messagesMessages.get(id);
-                    messages.add(message);
-                }*/
-                ArrayList<Integer> messages = new ArrayList<>();
-                for(Integer id : tlUpdateRestoreMessages.getMessages()) {
-                    messages.add(id);
-                }
-                if(messages.size() > 0) {
-                    updates.add(new UpdateRestoreMessages(messages, tlUpdateRestoreMessages.getPts()));
-                }
-            } else if(tlAbsUpdate instanceof TLUpdateUserName) {
-                TLUpdateUserName tlUpdateUserName = (TLUpdateUserName)tlAbsUpdate;
-                User user = users.get(tlUpdateUserName.getUserId());
-                users2.add(user);
-                updates.add(new UpdateUserName(user, tlUpdateUserName.getFirstName(), tlUpdateUserName.getLastName()));
-            } else if(tlAbsUpdate instanceof TLUpdateUserPhoto) {
-                TLUpdateUserPhoto tlUpdateUserPhoto = (TLUpdateUserPhoto)tlAbsUpdate;
-                User user = users.get(tlUpdateUserPhoto.getUserId());
-                users2.add(user);
-                updates.add(new UpdateUserPhoto(user,  intToDate(tlUpdateUserPhoto.getDate()), tlUpdateUserPhoto.getPhoto(), tlUpdateUserPhoto.getPrevious()));
-            } else if(tlAbsUpdate instanceof TLUpdateUserStatus) {
-                TLUpdateUserStatus tlUpdateUserStatus = (TLUpdateUserStatus)tlAbsUpdate;
-                User user = users.get(tlUpdateUserStatus.getUserId());
-                users2.add(user);
-                updates.add(new UpdateUserStatus(user, getExpires(tlUpdateUserStatus.getStatus())));
-            } else if(tlAbsUpdate instanceof TLUpdateUserTyping) {
-                TLUpdateUserTyping tlUpdateUserTyping = (TLUpdateUserTyping)tlAbsUpdate;
-                User user = users.get(tlUpdateUserTyping.getUserId());
-                users2.add(user);
-                updates.add(new UpdateUserTyping(user));
+                    updates.add(new UpdateMessageIDExt(messagesMessages.get(tlUpdateMessageID.getId()), tlUpdateMessageID.getRandomId()));
             } else {
+                acceptNonMessageUpdate(tlAbsUpdate, updates, users, users2, 0);
+            }
+        }
+    }
 
+    public static int acceptTLUpdates(List<? super Update> updates, List<TLAbsUpdate> tlAbsUpdates, List<Message> messages2,
+                                             Map<Integer, ? extends User> users, Set<? super User> users2) {
+
+        int pts = 0;
+
+        for(TLAbsUpdate tlAbsUpdate : tlAbsUpdates) {
+            if(tlAbsUpdate instanceof TLUpdateNewMessage) {
+                TLUpdateNewMessage tlUpdateNewMessage = (TLUpdateNewMessage)tlAbsUpdate;
+                //if(idOf(messages2, tlUpdateNewMessage.getMessage().getId()) == null)
+                Message message = new Message(tlUpdateNewMessage.getMessage());
+                messages2.add(message);
+                //idOf(messages2, tlUpdateNewMessage.getMessage().getId());
+                updates.add(new UpdateNewMessage(message, tlUpdateNewMessage.getPts()));//???
+                pts = Math.max(pts, tlUpdateNewMessage.getPts());
+            } else if(tlAbsUpdate instanceof TLUpdateMessageID) {
+                TLUpdateMessageID tlUpdateMessageID = (TLUpdateMessageID)tlAbsUpdate;
+                updates.add(new UpdateMessageID(tlUpdateMessageID.getId(), tlUpdateMessageID.getRandomId()));
+            } else {
+                pts = acceptNonMessageUpdate(tlAbsUpdate, updates, users, users2, pts);
             }
         }
 
-        //return updates;
+        return pts;
+    }
+
+    private static int acceptNonMessageUpdate(TLAbsUpdate tlAbsUpdate, List<? super Update> updates, Map<Integer, ? extends User> users, Set<? super User> users2, int pts) {
+        if(tlAbsUpdate instanceof TLUpdateReadMessages) {
+            TLUpdateReadMessages tlUpdateReadMessages = (TLUpdateReadMessages)tlAbsUpdate;
+            ArrayList<Integer> messages = new ArrayList<>();
+            for(Integer id : tlUpdateReadMessages.getMessages()) {
+                messages.add(id);
+            }
+            if(messages.size() > 0) {
+                updates.add(new UpdateReadMessage(messages, ((TLUpdateReadMessages) tlAbsUpdate).getPts()));
+            }
+            pts = Math.max(pts, tlUpdateReadMessages.getPts());
+        } else if(tlAbsUpdate instanceof TLUpdateDeleteMessages) {
+            TLUpdateDeleteMessages tlUpdateDeleteMessages = (TLUpdateDeleteMessages)tlAbsUpdate;
+            ArrayList<Integer> messages = new ArrayList<>();
+            for(Integer id : tlUpdateDeleteMessages.getMessages()) {
+                messages.add(id);
+            }
+            if(messages.size() > 0) {
+                updates.add(new UpdateDeleteMessages(messages, tlUpdateDeleteMessages.getPts()));
+            }
+            pts = Math.max(pts, tlUpdateDeleteMessages.getPts());
+        } else if(tlAbsUpdate instanceof TLUpdateRestoreMessages) {
+            TLUpdateRestoreMessages tlUpdateRestoreMessages = (TLUpdateRestoreMessages)tlAbsUpdate;
+            ArrayList<Integer> messages = new ArrayList<>();
+            for(Integer id : tlUpdateRestoreMessages.getMessages()) {
+                messages.add(id);
+            }
+            if(messages.size() > 0) {
+                updates.add(new UpdateRestoreMessages(messages, tlUpdateRestoreMessages.getPts()));
+            }
+            pts = Math.max(pts, tlUpdateRestoreMessages.getPts());
+        } else if(tlAbsUpdate instanceof TLUpdateUserName) {
+            TLUpdateUserName tlUpdateUserName = (TLUpdateUserName)tlAbsUpdate;
+            int userId = tlUpdateUserName.getUserId();
+            updates.add(new UpdateUserName(userId, tlUpdateUserName.getFirstName(), tlUpdateUserName.getLastName()));
+        } else if(tlAbsUpdate instanceof TLUpdateUserPhoto) {
+            TLUpdateUserPhoto tlUpdateUserPhoto = (TLUpdateUserPhoto)tlAbsUpdate;
+            int userId = tlUpdateUserPhoto.getUserId();
+            updates.add(new UpdateUserPhoto(userId,  intToDate(tlUpdateUserPhoto.getDate()), tlUpdateUserPhoto.getPhoto(), tlUpdateUserPhoto.getPrevious()));
+        } else if(tlAbsUpdate instanceof TLUpdateUserStatus) {
+            TLUpdateUserStatus tlUpdateUserStatus = (TLUpdateUserStatus)tlAbsUpdate;
+            int userId = tlUpdateUserStatus.getUserId();
+            updates.add(new UpdateUserStatus(userId, getExpires(tlUpdateUserStatus.getStatus())));
+        } else if(tlAbsUpdate instanceof TLUpdateUserTyping) {
+            TLUpdateUserTyping tlUpdateUserTyping = (TLUpdateUserTyping)tlAbsUpdate;
+            int userId = tlUpdateUserTyping.getUserId();
+            updates.add(new UpdateUserTyping(userId));
+        } else if(tlAbsUpdate instanceof TLUpdateContactLink) {
+            updates.add(new UpdateContact());
+        } else if(tlAbsUpdate instanceof TLUpdateContactRegistered) {
+            updates.add(new UpdateContact());
+        }
+        return pts;
+    }
+
+    static Message idOf(Collection<Message> messages, int messageId) {
+        for(Message message : messages) {
+            if(message.getId() == messageId)
+                return message;
+        }
+        return null;
     }
 
     static Date getExpires(TLAbsUserStatus tlAbsUserStatus) {
@@ -158,6 +175,13 @@ public class Helper {
             throw new InconsistentDataException();
         }
     }
+
+    /*static Map<Integer, Message> createMessagesMap(Collection<? extends Message> collection) {
+        Map<Integer, Message> messageMap = new LinkedHashMap<>();
+        for(Message message : collection)
+            messageMap.put(message.getId(), message);
+        return messageMap;
+    }*/
 
     static Map<Integer, MessagesMessage> createMessagesMap(Collection<? extends MessagesMessage> collection) {
         Map<Integer, MessagesMessage> messagesMessageMap = new LinkedHashMap<>();

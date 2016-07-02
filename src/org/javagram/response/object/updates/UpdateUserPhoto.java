@@ -12,20 +12,20 @@ import java.util.Date;
  * Created by HerrSergio on 22.05.2016.
  */
 public class UpdateUserPhoto implements Update {
-    private User user;
+    private int userId;
     private Date date;
     private TLAbsUserProfilePhoto photo;
     private boolean previous;
 
-    public UpdateUserPhoto(User user, Date date, TLAbsUserProfilePhoto photo, boolean previous) {
-        this.user = user;
+    public UpdateUserPhoto(int userId, Date date, TLAbsUserProfilePhoto photo, boolean previous) {
+        this.userId = userId;
         this.date = date;
         this.photo = photo;
         this.previous = previous;
     }
 
-    public User getUser() {
-        return user;
+    public int getUser() {
+        return userId;
     }
 
     public Date getDate() {

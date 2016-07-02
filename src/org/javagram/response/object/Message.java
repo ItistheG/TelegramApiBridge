@@ -3,6 +3,7 @@ package org.javagram.response.object;
 
 import com.sun.deploy.ref.Helpers;
 import org.javagram.response.ExpectedInconsistentDataException;
+import org.javagram.response.Helper;
 import org.javagram.response.InconsistentDataException;
 import org.telegram.api.*;
 import org.telegram.api.TLAbsMessage;
@@ -28,6 +29,16 @@ public class Message
 
     private Integer fwdFromId;
     private Date fwdData;
+
+    public Message(TLUpdateShortMessage tlUpdateShortMessage, int userSelfId) {
+        this.id = tlUpdateShortMessage.getId();
+        this.fromId = tlUpdateShortMessage.getFromId();
+        this.toPeerUserId = userSelfId;
+        this.out = false;
+        this.unread = true;
+        this.date = Helper.intToDate(tlUpdateShortMessage.getDate());
+        this.message = tlUpdateShortMessage.getMessage();
+    }
 
     public Message(TLAbsMessage absMessage)
     {

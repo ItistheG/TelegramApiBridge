@@ -21,7 +21,7 @@ public class UpdatesDifferenceOrSlice implements UpdatesAbsDifference {
     private boolean slice;
     private UpdatesState state;
     private ArrayList<MessagesMessage> newMessages = new ArrayList<>();
-    private  ArrayList<Update> otherUpdates = new ArrayList<>();
+    private ArrayList<Update> otherUpdates = new ArrayList<>();
     private HashSet<User> users = new HashSet<>();
 
     public UpdatesDifferenceOrSlice(TLAbsDifference tlAbsDifference, Map<Integer, User> users) {
@@ -53,7 +53,7 @@ public class UpdatesDifferenceOrSlice implements UpdatesAbsDifference {
         }
 
         Helper.acceptTLAbsMessages(this.newMessages, tlAbsUsers, tlAbsMessages, users, this.users);
-        Helper.acceptTLUpdates(this.otherUpdates, tlAbsUpdates, Helper.createMessagesMap(newMessages), users, this.users);
+        Helper.acceptTLOtherUpdates(this.otherUpdates, tlAbsUpdates, Helper.createMessagesMap(newMessages), users, this.users);
         this.state = new UpdatesState(tlState);
     }
 

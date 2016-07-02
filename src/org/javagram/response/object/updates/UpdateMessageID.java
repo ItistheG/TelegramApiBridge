@@ -7,11 +7,11 @@ import org.javagram.response.object.MessagesMessage;
  * Created by HerrSergio on 27.04.2016.
  */
 public class UpdateMessageID implements Update {
-    private MessagesMessage message;
+    private int messageId;
     private long randomId;
 
-    public UpdateMessageID(MessagesMessage message, long randomId) {
-        this.message = message;
+    public UpdateMessageID(int messageId, long randomId) {
+        this.messageId = messageId;
         this.randomId = randomId;
     }
 
@@ -19,7 +19,7 @@ public class UpdateMessageID implements Update {
         return randomId;
     }
 
-    public MessagesMessage getMessage() {
-        return message;
+    public int getMessageId() {
+        return messageId;
     }
 }
