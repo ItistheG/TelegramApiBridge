@@ -71,7 +71,7 @@ public class Main
                 System.err.println("You've signed up; name: " + me.toString());
             }
 
-            apiBridge.contactsImportContact(new InputContact(0, "+79173314167", "Denis", "Gaevoy"));
+            /*apiBridge.contactsImportContact(new InputContact(0, "+79173314167", "Denis", "Gaevoy"));
 
             UpdatesState s = apiBridge.updatesGetState();
             while(s != null) {
@@ -81,7 +81,7 @@ public class Main
             }
 
 
-            apiBridge.setIncomingMessageHandler(new IncMessageHandler());
+            apiBridge.setIncomingMessageHandler(new IncMessageHandler());*/
 
             UpdatesState updatesState = apiBridge.updatesGetState();
 

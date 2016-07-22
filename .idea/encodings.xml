@@ -7,6 +7,6 @@
     <file url="file://$PROJECT_DIR$/src/org/javagram/response/AuthAuthorization.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/org/javagram/response/object/User.java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/org/javagram/response/object/UserContact.java" charset="UTF-8" />
-    <file url="PROJECT" charset="UTF-8" />
+    <file url="PROJECT" charset="windows-1251" />
   </component>
 </project>

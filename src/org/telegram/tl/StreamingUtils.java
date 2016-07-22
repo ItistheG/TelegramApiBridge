@@ -3,6 +3,8 @@ package org.telegram.tl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Helper class for writing and reading data for tl (de-)serialization.
@@ -122,7 +124,7 @@ public class StreamingUtils {
      * @throws IOException
      */
     public static void writeTLString(String v, OutputStream stream) throws IOException {
-        writeTLBytes(v.getBytes(), stream);
+        writeTLBytes(v.getBytes(StandardCharsets.UTF_8), stream);
     }
 
     /**
@@ -303,7 +305,7 @@ public class StreamingUtils {
      * @throws IOException reading exception
      */
     public static String readTLString(InputStream stream) throws IOException {
-        return new String(readTLBytes(stream));
+        return new String(readTLBytes(stream), StandardCharsets.UTF_8);
     }
 
     /**
